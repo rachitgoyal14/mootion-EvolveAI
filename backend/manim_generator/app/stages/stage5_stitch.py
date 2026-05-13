@@ -162,7 +162,7 @@ def extract_audio_from_final(video_id: str):
 
 def send_to_sadtalker(
     audio_path: Path,
-    image_path: Path = Path("D:/bloop/data/avatars/sir-isaac-newton.webp"),
+    image_path: Path = Path("D:/mootion/data/avatars/sir-isaac-newton.webp"),
 ):
     url = "http://127.0.0.1:8000/video/generate"
 

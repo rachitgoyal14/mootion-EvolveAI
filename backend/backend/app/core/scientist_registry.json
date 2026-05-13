@@ -1,0 +1,21 @@
+{
+  "physics": {
+    "kinematics": "newton",
+    "dynamics": "newton",
+    "relativity": "einstein",
+    "electromagnetism": "maxwell",
+    "quantum": "bohr"
+  },
+  "mathematics": {
+    "calculus": "newton",
+    "calculus_leibniz": "leibniz",
+    "number theory": "ramanujan",
+    "geometry": "euclid",
+    "linear algebra": "gauss"
+  },
+  "chemistry": {
+    "atomic structure": "bohr",
+    "periodic table": "mendeleev",
+    "radioactivity": "curie"
+  }
+}
