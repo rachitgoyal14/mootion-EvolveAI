@@ -1,0 +1,26 @@
+[
+  {
+    "scene_id": 1,
+    "script": "Ionic bonds form when one atom transfers an electron to another. This creates positively and negatively charged ions that attract each other, holding the atoms together."
+  },
+  {
+    "scene_id": 2,
+    "script": "Common ionic compounds include sodium chloride, or table salt, and calcium carbonate, found in chalk. These consist of positively and negatively charged ions held together by ionic bonds."
+  },
+  {
+    "scene_id": 3,
+    "script": "Covalent bonds form when two atoms share electrons. Each atom contributes one electron, and together they create a shared pair that holds the atoms tightly."
+  },
+  {
+    "scene_id": 4,
+    "script": "Examples of covalent molecules are hydrogen gas, oxygen gas, and water. In each, atoms share electrons to form strong covalent bonds."
+  },
+  {
+    "scene_id": 5,
+    "script": "Organic compounds contain carbon and hydrogen atoms connected by covalent bonds. Examples include methane, glucose, and larger molecules with many carbon and hydrogen atoms."
+  },
+  {
+    "scene_id": 6,
+    "script": "It's important to know that 'organic bond' is not a new type of bond. It simply refers to covalent bonds in compounds containing carbon and hydrogen."
+  }
+]

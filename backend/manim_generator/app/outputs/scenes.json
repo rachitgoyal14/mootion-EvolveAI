@@ -1,0 +1,50 @@
+{
+  "category": "chemistry",
+  "scenes": [
+    {
+      "scene_id": 1,
+      "concept": "Ionic bond formation between metal and non-metal atoms",
+      "visual": "Show two atoms side by side: a metal atom labeled 'Na' with electrons orbiting, and a non-metal atom labeled 'Cl' with electrons. Animate an electron moving from Na to Cl, transforming Na into a positively charged ion (Na+) and Cl into a negatively charged ion (Cl-). Display opposite charges with plus and minus signs. Draw a double-headed arrow representing strong electrostatic attraction between Na+ and Cl-."
+    },
+    {
+      "scene_id": 2,
+      "concept": "Example of ionic bond: formation of table salt (NaCl)",
+      "visual": "Show the Na+ and Cl- ions coming together to form a lattice structure representing solid NaCl. Highlight the repeating pattern of alternating Na+ and Cl- ions arranged in a grid. Use color coding to distinguish positive and negative ions."
+    },
+    {
+      "scene_id": 3,
+      "concept": "Covalent bond formation by sharing electrons",
+      "visual": "Display two non-metal atoms labeled 'O' each with electrons in orbitals. Animate a pair of electrons moving to be shared between the two atoms, forming a shared electron pair in the overlapping region between the atoms. Show the atoms connected by a single line representing the covalent bond."
+    },
+    {
+      "scene_id": 4,
+      "concept": "Polar and non-polar covalent bonds",
+      "visual": "Show two atoms connected by a covalent bond. For non-polar, animate electrons evenly distributed between atoms with equal shading. For polar, animate electrons shifted closer to one atom, highlight partial charges with delta plus and delta minus symbols near atoms."
+    },
+    {
+      "scene_id": 5,
+      "concept": "Example of covalent bond: oxygen molecule (O2)",
+      "visual": "Show two oxygen atoms connected by a double covalent bond represented by two parallel lines between the atoms. Animate shared electron pairs between the atoms. Label the molecule as O2."
+    },
+    {
+      "scene_id": 6,
+      "concept": "Organic bonds in carbon-based molecules",
+      "visual": "Display a carbon atom labeled 'C' in the center connected by single covalent bonds (lines) to hydrogen atoms labeled 'H', oxygen atoms labeled 'O', and nitrogen atoms labeled 'N'. Show multiple bonds forming a simple organic molecule skeleton."
+    },
+    {
+      "scene_id": 7,
+      "concept": "Examples of organic bonds: C-C, C-H, C-O bonds",
+      "visual": "Zoom in on the organic molecule skeleton. Highlight and label specific bonds: a carbon-carbon single bond (C-C), a carbon-hydrogen bond (C-H), and a carbon-oxygen bond (C-O) with colored lines and text labels."
+    },
+    {
+      "scene_id": 8,
+      "concept": "Complex organic molecules with multiple bond types",
+      "visual": "Show a 2D structural formula of glucose (C6H12O6) with carbon, hydrogen, and oxygen atoms connected by covalent bonds. Animate highlighting of different bond types within the molecule. Optionally, show amino acid structure with labeled bonds."
+    },
+    {
+      "scene_id": 9,
+      "concept": "Clarification that organic bonds are a category, not a specific bond type",
+      "visual": "Display text 'Organic bonds = bonds within organic compounds' with a background of various organic molecules. Animate bonds changing color to indicate they can be covalent, ionic, or both, emphasizing the category nature."
+    }
+  ]
+}
