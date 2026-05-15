@@ -249,7 +249,7 @@ async function startServer() {
               responseModalities: ["AUDIO" as any],
               speechConfig: {
                   voiceConfig: {
-                    prebuiltVoiceConfig: { voiceName: 'Kore' },
+                    prebuiltVoiceConfig: { voiceName: 'Aoede' },
                   },
               },
             },
@@ -260,6 +260,29 @@ async function startServer() {
          console.error("TTS generation failed:", error);
          res.status(500).json({ error: "TTS Failed" });
       }
+  });
+
+  app.post("/api/chat", express.json(), async (req, res) => {
+    try {
+      const { topic, history, message } = req.body;
+      const contents = (history || []).map((msg: any) => ({
+        role: msg.role === 'user' ? 'user' : 'model',
+        parts: [{ text: msg.text }]
+      }));
+      contents.push({ role: 'user', parts: [{ text: message }] });
+
+      const aiRes = await ai.models.generateContent({
+        model: 'gemini-3-flash-preview',
+        contents,
+        config: {
+          systemInstruction: `You are a helpful AI tutor on the topic "${topic}". Be concise, friendly, and educational. Help the student explore this topic with clear explanations and encourage curiosity. Keep responses to 2-3 sentences.`
+        }
+      });
+      res.json({ text: aiRes.text });
+    } catch (error) {
+      console.error("Chat API error:", error);
+      res.status(500).json({ error: "Failed to get response" });
+    }
   });
 
   app.post("/api/practice/prove-it", express.json(), async (req, res) => {

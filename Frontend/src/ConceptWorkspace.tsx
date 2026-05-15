@@ -21,6 +21,8 @@ export default function ConceptWorkspace() {
   ]);
   const [inputValue, setInputValue] = useState('');
   const [showOptions, setShowOptions] = useState(false);
+  const [isChatLoading, setIsChatLoading] = useState(false);
+  const chatEndRef = useRef<HTMLDivElement>(null);
 
   const isLeftExpanded = expandedPanel === 'storyboard' || expandedPanel === 'playground' || expandedPanel === 'universe';
   const isRightExpanded = expandedPanel === 'prove-it' || expandedPanel === 'challenge' || expandedPanel === 'listen' || expandedPanel === 'flashcards' || expandedPanel === 'wrong-one';
@@ -250,6 +252,10 @@ export default function ConceptWorkspace() {
     }
   }, [proveItMessages, isProveItLoading]);
 
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, isChatLoading]);
+
   const resetChallenge = () => {
     setCurrentChallengeQ(0);
     setChallengeScore(0);
@@ -366,15 +372,32 @@ export default function ConceptWorkspace() {
       const data = await res.json();
       setProveItMessages(prev => [...prev, { role: 'model', text: data.text }]);
       
-      if ('speechSynthesis' in window) {
-         window.speechSynthesis.cancel();
-         const utterance = new SpeechSynthesisUtterance(data.text);
-         const voices = window.speechSynthesis.getVoices();
-         const preferred =
-            voices.find(v => v.name.includes('Google US English')) ||
-            voices.find(v => v.lang.startsWith('en'));
-         if (preferred) utterance.voice = preferred;
-         window.speechSynthesis.speak(utterance);
+      // Use TTS API for more natural voice
+      try {
+        const ttsRes = await fetch('/api/practice/tts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: data.text })
+        });
+        const ttsData = await ttsRes.json();
+        if (ttsData.audioBase64) {
+          const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+          const audioCtx = new AudioContextClass({ sampleRate: 24000 });
+          const binary = atob(ttsData.audioBase64);
+          const bytes = new Uint8Array(binary.length);
+          for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+          const int16 = new Int16Array(bytes.buffer);
+          const float32 = new Float32Array(int16.length);
+          for (let i = 0; i < int16.length; i++) float32[i] = int16[i] / 0x8000;
+          const buffer = audioCtx.createBuffer(1, float32.length, 24000);
+          buffer.getChannelData(0).set(float32);
+          const source = audioCtx.createBufferSource();
+          source.buffer = buffer;
+          source.connect(audioCtx.destination);
+          source.start(0);
+        }
+      } catch (ttsErr) {
+        console.error('Prove It TTS failed:', ttsErr);
       }
     } catch(e) {
       console.error(e);
@@ -383,31 +406,40 @@ export default function ConceptWorkspace() {
     }
   };
 
-  const handleSendMessage = (e?: React.FormEvent, preset?: string) => {
+  const handleSendMessage = async (e?: React.FormEvent, preset?: string) => {
     if (e) e.preventDefault();
-    
     const textToSend = preset || inputValue;
-    if (!textToSend.trim()) return;
+    if (!textToSend.trim() || isChatLoading) return;
 
     const newMsgs = [...messages, { id: Date.now().toString(), role: 'user', text: textToSend }];
     setMessages(newMsgs);
     setInputValue('');
-    
-    // Simulate thinking and options appearing
-    if (textToSend.toLowerCase().includes('orbit')) {
-       setTimeout(() => {
-         setShowOptions(true);
-       }, 800);
-    } else {
-        setTimeout(() => {
-             setMessages([...newMsgs, { id: Date.now().toString(), role: 'assistant', text: `That's interesting! Let's dive deeper into ${textToSend}.` }]);
-        }, 800);
+    setIsChatLoading(true);
+
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          topic,
+          history: newMsgs.slice(0, -1).map(m => ({ role: m.role, text: m.text })),
+          message: textToSend
+        })
+      });
+      const data = await res.json();
+      const reply = data.text || "Sorry, I couldn't get a response. Try again.";
+      setMessages(prev => [...prev, { id: Date.now().toString(), role: 'assistant', text: reply }]);
+    } catch (err) {
+      console.error('Chat API error:', err);
+      setMessages(prev => [...prev, { id: Date.now().toString(), role: 'assistant', text: 'Something went wrong. Please try again.' }]);
+    } finally {
+      setIsChatLoading(false);
     }
   };
 
   return (
-    <div className="h-screen w-full bg-[#fafaf8] flex flex-col lg:flex-row p-2 md:p-4 lg:p-6 gap-2 md:gap-4 lg:gap-6 overflow-hidden relative"
-         style={{ backgroundImage: 'linear-gradient(to right, #e5e7eb 1px, transparent 1px), linear-gradient(to bottom, #e5e7eb 1px, transparent 1px)', backgroundSize: '24px 24px', backgroundPosition: 'center top' }}>
+    <div className="h-screen w-full flex flex-col lg:flex-row p-2 md:p-4 lg:p-6 gap-2 md:gap-4 lg:gap-6 overflow-hidden relative"
+         style={{ background: '#f0f0ed', backgroundImage: 'linear-gradient(to right, #d1d5db 1px, transparent 1px), linear-gradient(to bottom, #d1d5db 1px, transparent 1px)', backgroundSize: '24px 24px' }}>
       {/* LEFT SIDEBAR - VISUAL SPACE */}
       <motion.div 
         layout
@@ -419,29 +451,44 @@ export default function ConceptWorkspace() {
           borderWidth: isRightExpanded ? '0px' : '1px',
           padding: isRightExpanded ? '0px' : ''
         }}
-        style={{ minWidth: 0, minHeight: 0 }}
-        className={`bg-white rounded-3xl border-gray-200 shadow-sm flex flex-col h-full flex-shrink-0 relative overflow-hidden ${isRightExpanded ? 'invisible lg:flex' : 'flex'}`}
+        style={{ minWidth: 0, minHeight: 0, background: 'rgba(255,255,255,0.82)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', boxShadow: '0 4px 32px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.9)' }}
+        className={`rounded-3xl border border-gray-200/80 flex flex-col h-full flex-shrink-0 relative overflow-hidden ${isRightExpanded ? 'invisible lg:flex' : 'flex'}`}
       >
         <div className="p-6 flex items-center justify-center border-b border-gray-100 pb-5">
            <h2 className="font-bold text-gray-900 uppercase tracking-widest text-sm">Visual space</h2>
         </div>
         
         {isLeftExpanded ? (
-          <div className="flex-1 w-full h-full bg-gray-50 flex flex-col items-center justify-center relative">
-            <button 
-              onClick={() => setExpandedPanel('none')} 
-              className="absolute top-4 right-4 p-2 bg-white rounded-full shadow-sm border border-gray-200 hover:bg-gray-100 z-[100] cursor-pointer"
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-            </button>
-            {expandedPanel === 'storyboard' && <div className="text-xl font-medium text-gray-500 flex flex-col items-center gap-4"><Play className="w-12 h-12 text-blue-500" /> Storyboard Player...</div>}
-            {expandedPanel === 'playground' && <div className="text-xl font-medium text-gray-500 flex flex-col items-center gap-4"><Settings2 className="w-12 h-12 text-green-500" /> Interactive Simulation...</div>}
-            {expandedPanel === 'universe' && <div className="text-xl font-medium text-gray-500 flex flex-col items-center gap-4"><Globe className="w-12 h-12 text-indigo-500" /> 3D Universe View...</div>}
+          <div className="flex-1 w-full h-full flex flex-col">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+              <h2 className="font-bold text-gray-900 uppercase tracking-widest text-sm">
+                {expandedPanel === 'storyboard' ? 'Storyboard' : expandedPanel === 'playground' ? 'Playground' : 'Universe'}
+              </h2>
+              <button
+                onClick={() => setExpandedPanel('none')}
+                className="p-2 rounded-full hover:bg-gray-100 border border-gray-200 bg-white transition-colors cursor-pointer"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+              </button>
+            </div>
+            <div className="flex-1 flex flex-col items-center justify-center">
+              {expandedPanel === 'storyboard' && (
+                <video
+                  src="/assests/kepler_final.mp4"
+                  controls
+                  autoPlay
+                  className="w-full h-full object-contain rounded-b-3xl"
+                  style={{ maxHeight: 'calc(100% - 0px)' }}
+                />
+              )}
+              {expandedPanel === 'playground' && <div className="text-xl font-medium text-gray-500 flex flex-col items-center gap-4"><Settings2 className="w-12 h-12 text-green-500" /> Interactive Simulation...</div>}
+              {expandedPanel === 'universe' && <div className="text-xl font-medium text-gray-500 flex flex-col items-center gap-4"><Globe className="w-12 h-12 text-indigo-500" /> 3D Universe View...</div>}
+            </div>
           </div>
         ) : (
           <div className="p-4 grid grid-cols-2 gap-3 flex-1 content-start overflow-y-auto">
-             <button onClick={() => setExpandedPanel('storyboard')} className="bg-white border border-gray-200 hover:border-black rounded-2xl p-4 flex flex-col justify-center items-center gap-3 transition-all text-center aspect-square shadow-sm">
-                <div className="text-black bg-[#fafaf8] rounded-full p-3 border border-gray-100">
+             <button onClick={() => setExpandedPanel('storyboard')} className="rounded-2xl p-4 flex flex-col justify-center items-center gap-3 transition-all text-center aspect-square border border-gray-200 hover:border-gray-400 hover:shadow-md" style={{ background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(8px)' }}>
+                <div className="text-gray-800 rounded-full p-3 border border-gray-200 bg-white/80">
                    <Play className="w-5 h-5 fill-current" />
                 </div>
                 <div>
@@ -449,8 +496,8 @@ export default function ConceptWorkspace() {
                 </div>
              </button>
              
-             <button onClick={() => setExpandedPanel('playground')} className="bg-white border border-gray-200 hover:border-black rounded-2xl p-4 flex flex-col justify-center items-center gap-3 transition-all text-center aspect-square shadow-sm">
-                <div className="text-black bg-[#fafaf8] rounded-full p-3 border border-gray-100">
+             <button onClick={() => setExpandedPanel('playground')} className="rounded-2xl p-4 flex flex-col justify-center items-center gap-3 transition-all text-center aspect-square border border-gray-200 hover:border-gray-400 hover:shadow-md" style={{ background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(8px)' }}>
+                <div className="text-gray-800 rounded-full p-3 border border-gray-200 bg-white/80">
                    <Settings2 className="w-5 h-5" />
                 </div>
                 <div>
@@ -458,8 +505,8 @@ export default function ConceptWorkspace() {
                 </div>
              </button>
 
-             <button onClick={() => setExpandedPanel('universe')} className="bg-white border border-gray-200 hover:border-black rounded-2xl p-4 flex flex-col justify-center items-center gap-3 transition-all text-center aspect-square shadow-sm">
-                <div className="text-black bg-[#fafaf8] rounded-full p-3 border border-gray-100">
+             <button onClick={() => setExpandedPanel('universe')} className="rounded-2xl p-4 flex flex-col justify-center items-center gap-3 transition-all text-center aspect-square border border-gray-200 hover:border-gray-400 hover:shadow-md" style={{ background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(8px)' }}>
+                <div className="text-gray-800 rounded-full p-3 border border-gray-200 bg-white/80">
                    <Globe className="w-5 h-5" />
                 </div>
                 <div>
@@ -478,8 +525,8 @@ export default function ConceptWorkspace() {
             flex: expandedPanel === 'none' ? 1.5 : 1,
             opacity: 1
         }}
-        style={{ minWidth: 0, minHeight: 0 }}
-        className="bg-white rounded-3xl border border-gray-200 shadow-sm flex flex-col h-full flex-shrink-0 relative overflow-hidden"
+        style={{ minWidth: 0, minHeight: 0, background: 'rgba(255,255,255,0.82)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', boxShadow: '0 4px 32px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.9)' }}
+        className="rounded-3xl border border-gray-200/80 flex flex-col h-full flex-shrink-0 relative overflow-hidden"
       >
         <div className="p-6 flex items-center justify-between border-b border-gray-100 pb-5">
            <div className="flex items-center gap-3">
@@ -490,19 +537,29 @@ export default function ConceptWorkspace() {
            </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-5 flex flex-col gap-4">
+        <div className="flex-1 overflow-y-auto p-5 flex flex-col gap-4" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
            {messages.map(msg => (
              <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                <div className={`max-w-[85%] rounded-2xl p-4 leading-relaxed break-words whitespace-pre-wrap ${
                  msg.role === 'user' 
                   ? 'bg-indigo-50 text-indigo-950 rounded-br-sm' 
-                  : 'bg-gray-50 text-gray-800 rounded-bl-sm border border-gray-100'
+                  : 'bg-white/80 text-gray-800 rounded-bl-sm border border-gray-100'
                }`}>
                   {msg.text}
                </div>
              </div>
            ))}
            
+           {isChatLoading && (
+             <div className="flex justify-start">
+               <div className="bg-white/80 text-gray-500 rounded-2xl rounded-bl-sm border border-gray-100 px-5 py-3 flex gap-1 items-center">
+                 <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                 <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                 <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+               </div>
+             </div>
+           )}
+           <div ref={chatEndRef} />
            {showOptions && (
               <motion.div 
                 initial={{ opacity: 0, y: 10 }}
@@ -527,11 +584,11 @@ export default function ConceptWorkspace() {
                  value={inputValue}
                  onChange={(e) => setInputValue(e.target.value)}
                  placeholder="Ask anything about this topic..."
-                 className="w-full bg-gray-50 border border-gray-200 rounded-2xl py-3.5 pl-4 pr-12 text-sm focus:outline-none focus:border-gray-400 focus:bg-white transition-colors"
+                 className="w-full bg-white/70 border border-gray-200 rounded-2xl py-3.5 pl-4 pr-12 text-sm focus:outline-none focus:border-gray-400 transition-colors"
               />
               <button 
                  type="submit" 
-                 disabled={!inputValue.trim()}
+                 disabled={!inputValue.trim() || isChatLoading}
                  className="absolute right-2 top-2 bottom-2 bg-black text-white rounded-xl w-10 flex items-center justify-center disabled:bg-gray-200 disabled:text-gray-400 transition-colors"
               >
                  <ArrowUp className="w-5 h-5" />
@@ -551,21 +608,28 @@ export default function ConceptWorkspace() {
           borderWidth: isLeftExpanded ? '0px' : '1px',
           padding: isLeftExpanded ? '0px' : ''
         }}
-        style={{ minWidth: 0, minHeight: 0 }}
-        className={`bg-white rounded-3xl border-gray-200 shadow-sm flex flex-col h-full flex-shrink-0 relative overflow-hidden ${isLeftExpanded ? 'invisible lg:flex' : 'flex'}`}
+        style={{ minWidth: 0, minHeight: 0, background: 'rgba(255,255,255,0.82)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', boxShadow: '0 4px 32px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.9)' }}
+        className={`rounded-3xl border border-gray-200/80 flex flex-col h-full flex-shrink-0 relative overflow-hidden ${isLeftExpanded ? 'invisible lg:flex' : 'flex'}`}
       >
-        <div className="p-6 flex items-center justify-center border-b border-gray-100 pb-5 relative z-10 bg-white">
-           <h2 className="font-bold text-gray-900 uppercase tracking-widest text-sm">Practice space</h2>
+        <div className="px-6 py-4 flex items-center justify-between border-b border-gray-100">
+           <h2 className="font-bold text-gray-900 uppercase tracking-widest text-sm">
+             {isRightExpanded
+               ? (expandedPanel === 'prove-it' ? 'Prove It' : expandedPanel === 'challenge' ? 'Challenge' : expandedPanel === 'listen' ? 'Listen' : expandedPanel === 'flashcards' ? 'Flashcards' : 'Wrong One')
+               : 'Practice space'}
+           </h2>
+           {isRightExpanded && (
+             <button
+               onClick={() => setExpandedPanel('none')}
+               className="p-2 rounded-full hover:bg-gray-100 border border-gray-200 bg-white transition-colors cursor-pointer"
+             >
+               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+             </button>
+           )}
+           {!isRightExpanded && <div />}
         </div>
         
         {isRightExpanded ? (
-          <div className="flex-1 w-full h-full bg-gray-50 flex flex-col items-center justify-center relative">
-            <button 
-              onClick={() => setExpandedPanel('none')} 
-              className="absolute top-4 right-4 p-2 bg-white rounded-full shadow-sm border border-gray-200 hover:bg-gray-100 z-[100] cursor-pointer"
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-            </button>
+          <div className="flex-1 w-full h-full flex flex-col items-center justify-center relative overflow-hidden">
          {expandedPanel === 'prove-it' && (
               <div className="w-full h-full flex flex-col p-8 relative z-10 overflow-hidden">
                  <div className="flex-1 w-full max-w-4xl mx-auto bg-white border border-gray-100 shadow-xl rounded-3xl p-6 flex flex-col mt-auto mb-auto relative">
@@ -717,60 +781,54 @@ export default function ConceptWorkspace() {
               </div>
             )}
             {expandedPanel === 'listen' && (
-              <div className="w-full h-full flex flex-col items-center relative bg-white overflow-hidden min-h-[400px]">
-                  <div className="absolute inset-0 bg-[#fafafa] z-0"></div>
-                  {isPlayingListen && <div className="absolute inset-0 bg-gray-100/50 animate-[pulse_4s_ease-in-out_infinite] pointer-events-none z-0"></div>}
-                  
-                  <div className="flex-1 w-full flex flex-col items-center justify-center gap-8 mt-12 mb-20 relative z-10">
-                     <div className={`w-40 h-40 rounded-full flex-shrink-0 flex items-center justify-center relative transition-all duration-700 ${isPlayingListen ? 'bg-white shadow-[0_0_80px_rgba(0,0,0,0.06)] border-8 border-white scale-105' : 'bg-gray-100 shadow-sm border-8 border-white'}`}>
-                        <Headphones className={`w-16 h-16 transition-all duration-700 ${isPlayingListen ? 'text-black' : 'text-gray-400'}`} />
+              <div className="w-full h-full flex flex-col p-8 relative z-10 overflow-hidden">
+                 <div className="flex-1 w-full max-w-4xl mx-auto bg-white border border-gray-100 shadow-xl rounded-3xl p-6 flex flex-col mt-auto mb-auto relative">
+                     <div className="flex justify-between items-center mb-4">
+                        <h3 className="text-2xl font-bold text-gray-900 flex items-center gap-3"><Headphones className="w-6 h-6 text-black"/> Listen: {topic}</h3>
                      </div>
-                     
-                     <div className="max-w-md w-full flex flex-col items-center gap-6">
-                       {isLoadingPractice ? (
-                         <p className="text-sm text-gray-400 animate-pulse tracking-wide font-medium">Synthesizing audio...</p>
-                       ) : (
-                         <>
-                           <div className="min-h-[40px] px-4 w-full flex flex-col items-center justify-center">
-                              {displayedListenIndex < 0 ? (
-                                <p className="text-[15px] text-gray-400 animate-pulse tracking-wide text-center">Loading audio...</p>
-                              ) : (
-                                <p className="text-base leading-relaxed text-gray-800 font-medium tracking-wide text-center animate-[fadeIn_0.5s_ease-out] line-clamp-2" key={displayedListenIndex}>
-                                   {listenSentences[displayedListenIndex] || "Finished."}
-                                </p>
-                              )}
-                           </div>
-                           <div className="flex justify-center gap-3">
-                              <button 
-                                 onClick={() => {
-                                    if (isPlayingListen) setIsPlayingListen(false);
-                                    else setIsPlayingListen(true);
-                                 }} 
-                                 className="w-12 h-12 flex items-center justify-center bg-transparent border border-gray-200 text-gray-800 rounded-full hover:bg-gray-50 hover:border-gray-300 transition-colors focus:outline-none"
-                                 title={isPlayingListen ? 'Pause' : 'Play'}
-                              >
-                                 {isPlayingListen ? (
-                                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
-                                 ) : (
-                                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-                                 )}
-                              </button>
-                              <button 
-                                 onClick={() => {
-                                    setListenIndex(0);
-                                    setDisplayedListenIndex(-1);
-                                    setIsPlayingListen(true);
-                                 }} 
-                                 className="w-12 h-12 flex items-center justify-center bg-transparent border border-gray-200 text-gray-500 rounded-full hover:bg-gray-50 hover:border-gray-300 transition-colors focus:outline-none"
-                                 title="Restart"
-                              >
-                                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
-                              </button>
-                           </div>
-                         </>
-                       )}
+                     <div className="flex-1 w-full flex flex-col items-center relative min-h-[400px]">
+                        <div className="flex-1 w-full flex flex-col items-center justify-center gap-8 mt-12 mb-20">
+                            <div className={`w-40 h-40 rounded-full flex-shrink-0 flex items-center justify-center relative transition-all duration-700 ${isPlayingListen ? 'bg-[#f4f4f5] shadow-[0_0_40px_rgba(0,0,0,0.08)] border-8 border-white animate-[pulse_2s_ease-in-out_infinite]' : 'bg-[#f4f4f5] shadow-sm border-8 border-white'}`}>
+                               <Headphones className={`w-16 h-16 transition-all duration-700 ${isPlayingListen ? 'text-gray-700' : 'text-gray-400'}`} />
+                            </div>
+                            <div className="text-center">
+                               <p className="text-[22px] font-bold text-gray-900 mb-2 tracking-tight">
+                                  {isLoadingPractice ? 'Preparing audio...' : isPlayingListen ? 'Playing...' : 'Paused'}
+                               </p>
+                               <p className="text-gray-500 text-[15px]">
+                                  {isLoadingPractice ? 'Generating your lecture...' : 'AI audio lecture on this topic'}
+                               </p>
+                            </div>
+                            <div className="min-h-[40px] px-4 w-full flex flex-col items-center justify-center">
+                               {isLoadingPractice ? (
+                                 <p className="text-sm text-gray-400 animate-pulse tracking-wide font-medium">Synthesizing audio...</p>
+                               ) : displayedListenIndex < 0 ? (
+                                 <p className="text-[15px] text-gray-400 animate-pulse tracking-wide text-center">Loading audio...</p>
+                               ) : (
+                                 <p className="text-base leading-relaxed text-gray-600 font-medium tracking-wide text-center line-clamp-2" key={displayedListenIndex}>
+                                    {listenSentences[displayedListenIndex] || 'Finished.'}
+                                 </p>
+                               )}
+                            </div>
+                        </div>
+                        <div className="absolute bottom-4 w-full flex justify-center gap-3">
+                           <button
+                              onClick={() => { if (isPlayingListen) setIsPlayingListen(false); else setIsPlayingListen(true); }}
+                              className="px-8 py-3.5 bg-black text-white rounded-full font-semibold tracking-wide hover:bg-gray-800 transition-colors shadow-md"
+                              title={isPlayingListen ? 'Pause' : 'Play'}
+                           >
+                              {isPlayingListen ? 'Pause' : 'Play'}
+                           </button>
+                           <button
+                              onClick={() => { setListenIndex(0); setDisplayedListenIndex(-1); setIsPlayingListen(true); }}
+                              className="px-8 py-3.5 bg-white border border-gray-200 text-gray-700 rounded-full font-semibold tracking-wide hover:bg-gray-50 transition-colors shadow-sm"
+                              title="Restart"
+                           >
+                              Restart
+                           </button>
+                        </div>
                      </div>
-                  </div>
+                 </div>
               </div>
             )}
             {expandedPanel === 'flashcards' && (
@@ -938,8 +996,8 @@ export default function ConceptWorkspace() {
           </div>
         ) : (
            <div className="p-4 grid grid-cols-2 gap-3 flex-1 content-start overflow-y-auto">
-             <button onClick={() => setExpandedPanel('prove-it')} className="bg-white border border-gray-200 hover:border-black rounded-2xl p-4 flex flex-col justify-center items-center gap-3 transition-all text-center aspect-square shadow-sm">
-                <div className="text-black bg-[#fafaf8] rounded-full p-3 border border-gray-100">
+             <button onClick={() => setExpandedPanel('prove-it')} className="rounded-2xl p-4 flex flex-col justify-center items-center gap-3 transition-all text-center aspect-square border border-gray-200 hover:border-gray-400 hover:shadow-md" style={{ background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(8px)' }}>
+                <div className="text-gray-800 rounded-full p-3 border border-gray-200 bg-white/80">
                    <FileBadge className="w-5 h-5" />
                 </div>
                 <div>
@@ -947,8 +1005,8 @@ export default function ConceptWorkspace() {
                 </div>
              </button>
              
-             <button onClick={() => setExpandedPanel('challenge')} className="bg-white border border-gray-200 hover:border-black rounded-2xl p-4 flex flex-col justify-center items-center gap-3 transition-all text-center aspect-square shadow-sm">
-                <div className="text-black bg-[#fafaf8] rounded-full p-3 border border-gray-100">
+             <button onClick={() => setExpandedPanel('challenge')} className="rounded-2xl p-4 flex flex-col justify-center items-center gap-3 transition-all text-center aspect-square border border-gray-200 hover:border-gray-400 hover:shadow-md" style={{ background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(8px)' }}>
+                <div className="text-gray-800 rounded-full p-3 border border-gray-200 bg-white/80">
                    <Zap className="w-5 h-5" />
                 </div>
                 <div>
@@ -956,8 +1014,8 @@ export default function ConceptWorkspace() {
                 </div>
              </button>
 
-             <button onClick={() => setExpandedPanel('listen')} className="bg-white border border-gray-200 hover:border-black rounded-2xl p-4 flex flex-col justify-center items-center gap-3 transition-all text-center aspect-square shadow-sm">
-                <div className="text-black bg-[#fafaf8] rounded-full p-3 border border-gray-100">
+             <button onClick={() => setExpandedPanel('listen')} className="rounded-2xl p-4 flex flex-col justify-center items-center gap-3 transition-all text-center aspect-square border border-gray-200 hover:border-gray-400 hover:shadow-md" style={{ background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(8px)' }}>
+                <div className="text-gray-800 rounded-full p-3 border border-gray-200 bg-white/80">
                    <Headphones className="w-5 h-5" />
                 </div>
                 <div>
@@ -965,8 +1023,8 @@ export default function ConceptWorkspace() {
                 </div>
              </button>
 
-             <button onClick={() => setExpandedPanel('flashcards')} className="bg-white border border-gray-200 hover:border-black rounded-2xl p-4 flex flex-col justify-center items-center gap-3 transition-all text-center aspect-square shadow-sm">
-                <div className="text-black bg-[#fafaf8] rounded-full p-3 border border-gray-100">
+             <button onClick={() => setExpandedPanel('flashcards')} className="rounded-2xl p-4 flex flex-col justify-center items-center gap-3 transition-all text-center aspect-square border border-gray-200 hover:border-gray-400 hover:shadow-md" style={{ background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(8px)' }}>
+                <div className="text-gray-800 rounded-full p-3 border border-gray-200 bg-white/80">
                    <Layers className="w-5 h-5" />
                 </div>
                 <div>
@@ -974,8 +1032,8 @@ export default function ConceptWorkspace() {
                 </div>
              </button>
 
-             <button onClick={() => setExpandedPanel('wrong-one')} className="bg-white border border-gray-200 hover:border-black rounded-2xl p-4 flex flex-col justify-center items-center gap-3 transition-all text-center aspect-square shadow-sm">
-                <div className="text-black bg-[#fafaf8] rounded-full p-3 border border-gray-100">
+             <button onClick={() => setExpandedPanel('wrong-one')} className="rounded-2xl p-4 flex flex-col justify-center items-center gap-3 transition-all text-center aspect-square border border-gray-200 hover:border-gray-400 hover:shadow-md" style={{ background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(8px)' }}>
+                <div className="text-gray-800 rounded-full p-3 border border-gray-200 bg-white/80">
                    <FileX className="w-5 h-5" />
                 </div>
                 <div>
