@@ -216,7 +216,7 @@ export default function ConceptWorkspace() {
             const timer = setTimeout(() => setChallengeTimeLeft(t => t - 1), 1000);
             return () => clearTimeout(timer);
          } else {
-            setChallengeSelected(-1); // -1 means time out / wrong
+            setChallengeSelected(-1);
          }
       }
     }
@@ -240,7 +240,7 @@ export default function ConceptWorkspace() {
             const timer = setTimeout(() => setWrongOneTimeLeft(t => t - 1), 1000);
             return () => clearTimeout(timer);
          } else {
-            setWrongOneSelected(-1); // -1 means time out / wrong
+            setWrongOneSelected(-1);
          }
       }
     }
@@ -305,7 +305,6 @@ export default function ConceptWorkspace() {
        if (text.trim()) {
           setProveItInput(text);
           handleProveItSubmit(text);
-          // Stop recording to wait for AI response
           recognition.stop();
        }
     };
@@ -372,7 +371,6 @@ export default function ConceptWorkspace() {
       const data = await res.json();
       setProveItMessages(prev => [...prev, { role: 'model', text: data.text }]);
       
-      // Use TTS API for more natural voice
       try {
         const ttsRes = await fetch('/api/practice/tts', {
           method: 'POST',
@@ -451,39 +449,51 @@ export default function ConceptWorkspace() {
           borderWidth: isRightExpanded ? '0px' : '1px',
           padding: isRightExpanded ? '0px' : ''
         }}
-        style={{ minWidth: 0, minHeight: 0, background: 'rgba(255,255,255,0.82)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', boxShadow: '0 4px 32px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.9)' }}
-        className={`rounded-3xl border border-gray-200/80 flex flex-col h-full flex-shrink-0 relative overflow-hidden ${isRightExpanded ? 'invisible lg:flex' : 'flex'}`}
+        style={{ minWidth: 0, minHeight: 0, background: 'rgba(255,255,255,0.45)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', boxShadow: '0 8px 32px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.7)' }}
+        className={`rounded-3xl border border-gray-200/80 flex flex-col h-full flex-shrink-0 relative ${isLeftExpanded ? 'overflow-hidden' : 'overflow-hidden'} ${isRightExpanded ? 'invisible lg:flex' : 'flex'}`}
       >
-        <div className="p-6 flex items-center justify-center border-b border-gray-100 pb-5">
-           <h2 className="font-bold text-gray-900 uppercase tracking-widest text-sm">Visual space</h2>
+        <div className="px-6 py-5 flex items-center justify-between border-b border-gray-100 flex-shrink-0">
+           <h2 className="font-bold text-gray-900 uppercase tracking-widest text-sm">
+             {isLeftExpanded
+               ? (expandedPanel === 'storyboard' ? 'Storyboard' : expandedPanel === 'playground' ? 'Playground' : 'Universe')
+               : 'Visual space'}
+           </h2>
+           {isLeftExpanded && (
+             <button
+               onClick={() => setExpandedPanel('none')}
+               className="p-2 rounded-full hover:bg-gray-100 border border-gray-200 bg-white transition-colors cursor-pointer"
+             >
+               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+             </button>
+           )}
         </div>
         
         {isLeftExpanded ? (
-          <div className="flex-1 w-full h-full flex flex-col">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-              <h2 className="font-bold text-gray-900 uppercase tracking-widest text-sm">
-                {expandedPanel === 'storyboard' ? 'Storyboard' : expandedPanel === 'playground' ? 'Playground' : 'Universe'}
-              </h2>
-              <button
-                onClick={() => setExpandedPanel('none')}
-                className="p-2 rounded-full hover:bg-gray-100 border border-gray-200 bg-white transition-colors cursor-pointer"
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-              </button>
-            </div>
-            <div className="flex-1 flex flex-col items-center justify-center">
-              {expandedPanel === 'storyboard' && (
-                <video
-                  src="/assests/kepler_final.mp4"
-                  controls
-                  autoPlay
-                  className="w-full h-full object-contain rounded-b-3xl"
-                  style={{ maxHeight: 'calc(100% - 0px)' }}
-                />
-              )}
-              {expandedPanel === 'playground' && <div className="text-xl font-medium text-gray-500 flex flex-col items-center gap-4"><Settings2 className="w-12 h-12 text-green-500" /> Interactive Simulation...</div>}
-              {expandedPanel === 'universe' && <div className="text-xl font-medium text-gray-500 flex flex-col items-center gap-4"><Globe className="w-12 h-12 text-indigo-500" /> 3D Universe View...</div>}
-            </div>
+          <div className="flex-1 relative">
+            {expandedPanel === 'storyboard' && (
+              <video
+                src="/assests/kepler_final.mp4"
+                controls
+                autoPlay
+                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'contain', display: 'block', background: '#000' }}
+              />
+            )}
+            {expandedPanel === 'playground' && (
+              <iframe
+                src="/playground/kepler.html"
+                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 'none' }}
+                title="Kepler Laws Simulation"
+                allow="autoplay"
+              />
+            )}
+            {expandedPanel === 'universe' && (
+              <iframe
+                src="/universe/index.html"
+                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 'none' }}
+                title="3D Solar System"
+                allow="autoplay"
+              />
+            )}
           </div>
         ) : (
           <div className="p-4 grid grid-cols-2 gap-3 flex-1 content-start overflow-y-auto">
@@ -496,7 +506,7 @@ export default function ConceptWorkspace() {
                 </div>
              </button>
              
-             <button onClick={() => setExpandedPanel('playground')} className="rounded-2xl p-4 flex flex-col justify-center items-center gap-3 transition-all text-center aspect-square border border-gray-200 hover:border-gray-400 hover:shadow-md" style={{ background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(8px)' }}>
+             <button onClick={() => setExpandedPanel('playground')} className="rounded-2xl p-4 flex flex-col justify-center items-center gap-3 transition-all text-center aspect-square border border-gray-200 hover:border-gray-400 hover:shadow-md" style={{ background: 'rgba(255,255,255,0.5)', backdropFilter: 'blur(12px)' }}>
                 <div className="text-gray-800 rounded-full p-3 border border-gray-200 bg-white/80">
                    <Settings2 className="w-5 h-5" />
                 </div>
@@ -505,7 +515,7 @@ export default function ConceptWorkspace() {
                 </div>
              </button>
 
-             <button onClick={() => setExpandedPanel('universe')} className="rounded-2xl p-4 flex flex-col justify-center items-center gap-3 transition-all text-center aspect-square border border-gray-200 hover:border-gray-400 hover:shadow-md" style={{ background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(8px)' }}>
+             <button onClick={() => setExpandedPanel('universe')} className="rounded-2xl p-4 flex flex-col justify-center items-center gap-3 transition-all text-center aspect-square border border-gray-200 hover:border-gray-400 hover:shadow-md" style={{ background: 'rgba(255,255,255,0.5)', backdropFilter: 'blur(12px)' }}>
                 <div className="text-gray-800 rounded-full p-3 border border-gray-200 bg-white/80">
                    <Globe className="w-5 h-5" />
                 </div>
@@ -525,10 +535,10 @@ export default function ConceptWorkspace() {
             flex: expandedPanel === 'none' ? 1.5 : 1,
             opacity: 1
         }}
-        style={{ minWidth: 0, minHeight: 0, background: 'rgba(255,255,255,0.82)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', boxShadow: '0 4px 32px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.9)' }}
+        style={{ minWidth: 0, minHeight: 0, background: 'rgba(255,255,255,0.45)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', boxShadow: '0 8px 32px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.7)' }}
         className="rounded-3xl border border-gray-200/80 flex flex-col h-full flex-shrink-0 relative overflow-hidden"
       >
-        <div className="p-6 flex items-center justify-between border-b border-gray-100 pb-5">
+        <div className="px-6 py-5 flex items-center justify-between border-b border-gray-100 flex-shrink-0">
            <div className="flex items-center gap-3">
               <button onClick={() => navigate('/roadmap')} className="p-2 -ml-2 rounded-full hover:bg-gray-100 transition-colors">
                   <ArrowLeft className="w-5 h-5 text-gray-400 hover:text-black" />
@@ -608,10 +618,10 @@ export default function ConceptWorkspace() {
           borderWidth: isLeftExpanded ? '0px' : '1px',
           padding: isLeftExpanded ? '0px' : ''
         }}
-        style={{ minWidth: 0, minHeight: 0, background: 'rgba(255,255,255,0.82)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', boxShadow: '0 4px 32px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.9)' }}
+        style={{ minWidth: 0, minHeight: 0, background: 'rgba(255,255,255,0.45)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', boxShadow: '0 8px 32px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.7)' }}
         className={`rounded-3xl border border-gray-200/80 flex flex-col h-full flex-shrink-0 relative overflow-hidden ${isLeftExpanded ? 'invisible lg:flex' : 'flex'}`}
       >
-        <div className="px-6 py-4 flex items-center justify-between border-b border-gray-100">
+        <div className="px-6 py-5 flex items-center justify-between border-b border-gray-100 flex-shrink-0">
            <h2 className="font-bold text-gray-900 uppercase tracking-widest text-sm">
              {isRightExpanded
                ? (expandedPanel === 'prove-it' ? 'Prove It' : expandedPanel === 'challenge' ? 'Challenge' : expandedPanel === 'listen' ? 'Listen' : expandedPanel === 'flashcards' ? 'Flashcards' : 'Wrong One')
@@ -690,94 +700,116 @@ export default function ConceptWorkspace() {
                </div>
             )}
             {expandedPanel === 'challenge' && (
-              <div className="w-full h-full p-4 md:p-8 relative z-10 flex items-center justify-center">
-                 <div className="w-full max-w-4xl max-h-full bg-white border border-gray-100 shadow-xl rounded-3xl flex flex-col min-h-0">
-                    <div className="p-6 md:p-10 pb-6 shrink-0 border-b border-gray-50 flex justify-between items-center z-10">
-                       <h3 className="text-2xl font-bold text-gray-900 flex items-center gap-3"><Zap className="w-6 h-6 text-black"/> Interactive Quiz: {topic}</h3>
-                       {challengeData.length > 0 && challengeStatus === 'playing' && (
-                          <div className="flex items-center gap-4">
-                             <div className={`font-mono text-lg font-bold ${challengeTimeLeft <= 10 ? 'text-red-500 animate-pulse' : 'text-gray-700'}`}>
-                                00:{challengeTimeLeft.toString().padStart(2, '0')}
-                             </div>
-                             <div className="text-gray-500 font-medium">Question {currentChallengeQ + 1} of {challengeData.length}</div>
-                          </div>
-                       )}
-                    </div>
-                    
-                    
-                     {isLoadingPractice ? (
-                       <div className="text-center py-10 animate-pulse text-gray-500">Generating challenge...</div>
-                    ) : challengeData.length > 0 ? (
-                       challengeStatus === 'playing' ? (
-                          <div className="flex flex-col gap-6">
-                             <div className="mb-4">
-                                <p className="font-semibold text-xl mb-6">{challengeData[currentChallengeQ].question}</p>
-                                <div className="grid grid-cols-1 gap-3">
-                                   {challengeData[currentChallengeQ].options.map((opt: string, optIdx: number) => (
-                                     <button 
-                                        key={optIdx} 
-                                        onClick={() => {
-                                           setChallengeSelected(optIdx);
-                                           if (optIdx === challengeData[currentChallengeQ].correctAnswerIndex) {
-                                              setChallengeScore(s => s + 1);
-                                           }
-                                        }} 
-                                        disabled={challengeSelected !== null}
-                                        className={`border text-left shadow-sm rounded-2xl p-5 font-medium transition-all ${
-                                           challengeSelected === null 
-                                            ? 'bg-white border-gray-200 hover:border-black text-gray-800' 
-                                            : optIdx === challengeData[currentChallengeQ].correctAnswerIndex
-                                               ? 'bg-green-50 border-green-500 text-green-900'
-                                               : challengeSelected === optIdx
-                                                  ? 'bg-red-50 border-red-500 text-red-900'
-                                                  : 'bg-white border-gray-200 text-gray-400 opacity-50'
-                                        }`}
-                                     >
-                                        <div className="flex items-center gap-3">
-                                           <div className={`w-6 h-6 rounded border flex items-center justify-center text-sm ${challengeSelected !== null && optIdx === challengeData[currentChallengeQ].correctAnswerIndex ? 'bg-green-500 border-green-600 text-white' : 'border-gray-300'}`}>
-                                              {String.fromCharCode(65 + optIdx)}
-                                           </div>
-                                           {opt}
-                                        </div>
-                                     </button>
-                                   ))}
-                                </div>
-                             </div>
-                             {challengeSelected !== null && (
-                                <div className="mt-2 flex justify-end shrink-0">
-                                   <button 
-                                      onClick={() => {
-                                         if (currentChallengeQ < challengeData.length - 1) {
-                                            setCurrentChallengeQ(q => q + 1);
-                                            setChallengeSelected(null);
-                                            setChallengeTimeLeft(30);
-                                         } else {
-                                            setChallengeStatus('completed');
-                                         }
-                                      }}
-                                      className="px-8 py-3 bg-black text-white rounded-xl font-medium hover:bg-gray-800 transition-colors"
-                                   >
-                                      {currentChallengeQ < challengeData.length - 1 ? 'Next Question' : 'View Results'}
-                                   </button>
-                                </div>
-                             )}
-                          </div>
-                       ) : (
-                           <div className="text-center py-12 flex flex-col items-center">
-                             <div className="w-32 h-32 bg-gray-50 rounded-full flex items-center justify-center mb-6">
-                                <span className="text-4xl font-bold text-gray-900">{challengeScore}/{challengeData.length}</span>
-                             </div>
-                             <h4 className="text-2xl font-bold text-gray-900 mb-2">Quiz Completed!</h4>
-                             <p className="text-gray-500 text-lg mb-8">You scored {Math.round((challengeScore / challengeData.length) * 100)}% accuracy.</p>
-                             <button onClick={resetChallenge} className="px-8 py-4 bg-black text-white rounded-full font-bold uppercase tracking-wider text-sm hover:bg-gray-800 transition-colors">
-                                Retry Quiz
-                             </button>
-                          </div>
-                       )
-                    ) : (
-                       <div className="text-center py-10 text-gray-500">No questions available.</div>
+              <div className="w-full h-full flex flex-col p-6 md:p-8 relative z-10 overflow-hidden">
+                <div className="w-full max-w-3xl mx-auto my-auto bg-white border border-gray-100 shadow-xl rounded-3xl flex flex-col max-h-full overflow-hidden">
+
+                  {/* Header */}
+                  <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between flex-shrink-0">
+                    <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                      <Zap className="w-5 h-5 text-black" /> Challenge
+                    </h3>
+                    {challengeData.length > 0 && challengeStatus === 'playing' && (
+                      <div className="flex items-center gap-3">
+                        <span className="text-sm text-gray-400 font-medium">{currentChallengeQ + 1} / {challengeData.length}</span>
+                        <div className={`px-3 py-1 rounded-full text-sm font-bold font-mono ${
+                          challengeTimeLeft <= 10 ? 'bg-red-50 text-red-500' : 'bg-gray-100 text-gray-700'
+                        }`}>
+                          0:{challengeTimeLeft.toString().padStart(2, '0')}
+                        </div>
+                      </div>
                     )}
-                 </div>
+                  </div>
+
+                  {/* Body */}
+                  {isLoadingPractice ? (
+                    <div className="flex-1 flex items-center justify-center">
+                      <div className="text-center">
+                        <div className="w-10 h-10 border-2 border-gray-200 border-t-black rounded-full animate-spin mx-auto mb-3" />
+                        <p className="text-gray-400 text-sm">Generating challenge...</p>
+                      </div>
+                    </div>
+                  ) : challengeData.length > 0 ? (
+                    challengeStatus === 'playing' ? (
+                      <div className="flex-1 flex flex-col min-h-0">
+                        {/* Progress bar */}
+                        <div className="h-1 bg-gray-100 flex-shrink-0">
+                          <div className="h-full bg-black transition-all duration-300" style={{ width: `${((currentChallengeQ) / challengeData.length) * 100}%` }} />
+                        </div>
+                        {/* Scrollable content */}
+                        <div className="flex-1 overflow-y-auto p-6" style={{ scrollbarWidth: 'none' }}>
+                          <p className="text-base md:text-lg font-semibold text-gray-900 mb-5 leading-relaxed">
+                            {challengeData[currentChallengeQ].question}
+                          </p>
+                          <div className="flex flex-col gap-2.5">
+                            {challengeData[currentChallengeQ].options.map((opt: string, optIdx: number) => (
+                              <button
+                                key={optIdx}
+                                onClick={() => {
+                                  setChallengeSelected(optIdx);
+                                  if (optIdx === challengeData[currentChallengeQ].correctAnswerIndex) setChallengeScore(s => s + 1);
+                                }}
+                                disabled={challengeSelected !== null}
+                                className={`w-full text-left rounded-2xl px-4 py-3.5 border font-medium text-sm transition-all flex items-center gap-3 ${
+                                  challengeSelected === null
+                                    ? 'bg-gray-50 border-gray-200 hover:border-gray-900 hover:bg-white text-gray-800'
+                                    : optIdx === challengeData[currentChallengeQ].correctAnswerIndex
+                                      ? 'bg-green-50 border-green-400 text-green-900'
+                                      : challengeSelected === optIdx
+                                        ? 'bg-red-50 border-red-400 text-red-900'
+                                        : 'bg-gray-50 border-gray-100 text-gray-300'
+                                }`}
+                              >
+                                <span className={`w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold border ${
+                                  challengeSelected !== null && optIdx === challengeData[currentChallengeQ].correctAnswerIndex
+                                    ? 'bg-green-500 border-green-500 text-white'
+                                    : challengeSelected === optIdx && optIdx !== challengeData[currentChallengeQ].correctAnswerIndex
+                                      ? 'bg-red-500 border-red-500 text-white'
+                                      : 'border-gray-300 text-gray-500 bg-white'
+                                }`}>{String.fromCharCode(65 + optIdx)}</span>
+                                {opt}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                        {/* Footer */}
+                        {challengeSelected !== null && (
+                          <div className="px-6 py-4 border-t border-gray-100 flex justify-end flex-shrink-0">
+                            <button
+                              onClick={() => {
+                                if (currentChallengeQ < challengeData.length - 1) {
+                                  setCurrentChallengeQ(q => q + 1);
+                                  setChallengeSelected(null);
+                                  setChallengeTimeLeft(30);
+                                } else {
+                                  setChallengeStatus('completed');
+                                }
+                              }}
+                              className="px-6 py-2.5 bg-black text-white rounded-full text-sm font-semibold hover:bg-gray-800 transition-colors"
+                            >
+                              {currentChallengeQ < challengeData.length - 1 ? 'Next →' : 'See Results'}
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
+                        <div className="w-28 h-28 rounded-full bg-gray-50 border-4 border-gray-100 flex items-center justify-center mb-5">
+                          <span className="text-3xl font-bold text-gray-900">{Math.round((challengeScore / challengeData.length) * 100)}%</span>
+                        </div>
+                        <h4 className="text-2xl font-bold text-gray-900 mb-1">Quiz Complete!</h4>
+                        <p className="text-gray-400 mb-1">{challengeScore} correct out of {challengeData.length}</p>
+                        <p className="text-gray-400 text-sm mb-8">
+                          {challengeScore === challengeData.length ? '🎉 Perfect score!' : challengeScore >= challengeData.length * 0.7 ? '👏 Great job!' : '📚 Keep studying!'}
+                        </p>
+                        <button onClick={resetChallenge} className="px-8 py-3 bg-black text-white rounded-full font-semibold text-sm hover:bg-gray-800 transition-colors">
+                          Try Again
+                        </button>
+                      </div>
+                    )
+                  ) : (
+                    <div className="flex-1 flex items-center justify-center text-gray-400 text-sm">No questions available.</div>
+                  )}
+                </div>
               </div>
             )}
             {expandedPanel === 'listen' && (
@@ -895,108 +927,131 @@ export default function ConceptWorkspace() {
                  </div>
                </div>
             )}
-            {expandedPanel === 'wrong-one' && (
-              <div className="w-full h-full p-4 md:p-8 relative z-10 flex items-center justify-center">
-<div className="w-full max-w-4xl max-h-full bg-white border border-gray-100 shadow-xl rounded-3xl flex flex-col min-h-0">
-<div className="p-6 md:p-10 pb-6 shrink-0 border-b border-gray-50 flex justify-between items-center z-10">
-                       <h3 className="text-2xl font-bold text-gray-900 flex items-center gap-3"><FileX className="w-6 h-6 text-black"/> Find the WRONG Statement: {topic}</h3>
-                       {wrongOneData.length > 0 && wrongOneStatus === 'playing' && (
-                          <div className="flex items-center gap-4">
-                             <div className={`font-mono text-lg font-bold ${wrongOneTimeLeft <= 10 ? 'text-red-500 animate-pulse' : 'text-gray-700'}`}>
-                                00:{wrongOneTimeLeft.toString().padStart(2, '0')}
-                             </div>
-                             <div className="text-gray-500 font-medium">Question {currentWrongOneQ + 1} of {wrongOneData.length}</div>
-                          </div>
-                       )}
-                    </div>
+              {expandedPanel === 'wrong-one' && (
+              <div className="w-full h-full flex flex-col p-6 md:p-8 relative z-10 overflow-hidden">
+                <div className="w-full max-w-3xl mx-auto my-auto bg-white border border-gray-100 shadow-xl rounded-3xl flex flex-col max-h-full overflow-hidden">
 
-                    <div className="flex-1 overflow-y-auto p-6 md:p-10 min-h-0">
-                    {isLoadingPractice ? (
-                       <div className="text-center py-10 animate-pulse text-gray-500">Generating trick questions...</div>
-                    ) : wrongOneData.length > 0 ? (
-                       wrongOneStatus === 'playing' ? (
-                          <div className="flex flex-col gap-6">
-                             <div className="bg-white p-2 rounded-2xl">
-                                <p className="font-semibold text-lg md:text-xl mb-6 text-gray-900">Which statement is INCORRECT?</p>
-                                <div className="grid grid-cols-1 gap-3 mb-4">
-                                   {wrongOneData[currentWrongOneQ].options.map((opt: string, optIdx: number) => (
-                                     <button 
-                                        key={optIdx} 
-                                        onClick={() => {
-                                            setWrongOneSelected(optIdx);
-                                            if (optIdx === wrongOneData[currentWrongOneQ].wrongAnswerIndex) {
-                                               setWrongOneScore(s => s + 1);
-                                            }
-                                        }}
-                                        disabled={wrongOneSelected !== null}
-                                        className={`border text-left shadow-sm rounded-2xl p-5 font-medium transition-all ${
-                                           wrongOneSelected === null 
-                                            ? 'bg-white border-gray-200 hover:border-black text-gray-800' 
-                                            : optIdx === wrongOneData[currentWrongOneQ].wrongAnswerIndex
-                                               ? 'bg-green-50 border-green-500 text-green-900'
-                                               : wrongOneSelected === optIdx
-                                                  ? 'bg-red-50 border-red-500 text-red-900'
-                                                  : 'bg-white border-gray-200 text-gray-400 opacity-50'
-                                        }`}
-                                     >
-                                        <div className="flex items-center gap-3">
-                                           <div className={`w-8 h-8 rounded-full border flex items-center justify-center text-sm shrink-0 font-bold ${wrongOneSelected !== null && optIdx === wrongOneData[currentWrongOneQ].wrongAnswerIndex ? "bg-green-500 border-green-600 text-white" : wrongOneSelected === optIdx && optIdx !== wrongOneData[currentWrongOneQ].wrongAnswerIndex ? "bg-red-500 border-red-600 text-white" : "border-gray-200 text-gray-500 bg-gray-50"}`}>
-                                              {String.fromCharCode(65 + optIdx)}
-                                           </div>
-                                           {opt}
-                                        </div>
-                                     </button>
-                                   ))}
-                                </div>
-                                {wrongOneSelected !== null && (
-                                   <div className="mt-4 p-5 bg-blue-50 text-blue-900 text-sm rounded-xl border border-blue-100">
-                                      <span className="font-bold text-base block mb-2">Explanation:</span> 
-                                      {wrongOneData[currentWrongOneQ].explanation}
-                                   </div>
-                                )}
-                             </div>
-                             {wrongOneSelected !== null && (
-                                <div className="mt-4 flex justify-end">
-                                   <button 
-                                      onClick={() => {
-                                         if (currentWrongOneQ < wrongOneData.length - 1) {
-                                            setCurrentWrongOneQ(q => q + 1);
-                                            setWrongOneSelected(null);
-                                            setWrongOneTimeLeft(30);
-                                         } else {
-                                            setWrongOneStatus('completed');
-                                         }
-                                      }}
-                                      className="px-8 py-3 bg-black text-white rounded-xl font-medium hover:bg-gray-800 transition-colors"
-                                   >
-                                      {currentWrongOneQ < wrongOneData.length - 1 ? 'Next Question' : 'View Results'}
-                                   </button>
-                                </div>
-                             )}
-                          </div>
-                       ) : (
-                           <div className="text-center py-12 flex flex-col items-center">
-                             <div className="w-32 h-32 bg-gray-50 rounded-full flex items-center justify-center mb-6">
-                                <span className="text-4xl font-bold text-gray-900">{wrongOneScore}/{wrongOneData.length}</span>
-                             </div>
-                             <h4 className="text-2xl font-bold text-gray-900 mb-2">Quiz Completed!</h4>
-                             <p className="text-gray-500 text-lg mb-8">You scored {Math.round((wrongOneScore / wrongOneData.length) * 100)}% accuracy.</p>
-                             <button onClick={resetWrongOne} className="px-8 py-4 bg-black text-white rounded-full font-bold uppercase tracking-wider text-sm hover:bg-gray-800 transition-colors">
-                                Retry Quiz
-                             </button>
-                          </div>
-                       )
-                    ) : (
-                       <div className="text-center py-10 text-gray-500">No trick questions available.</div>
+                  {/* Header */}
+                  <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between flex-shrink-0">
+                    <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                      <FileX className="w-5 h-5 text-black" /> Wrong One
+                    </h3>
+                    {wrongOneData.length > 0 && wrongOneStatus === 'playing' && (
+                      <div className="flex items-center gap-3">
+                        <span className="text-sm text-gray-400 font-medium">{currentWrongOneQ + 1} / {wrongOneData.length}</span>
+                        <div className={`px-3 py-1 rounded-full text-sm font-bold font-mono ${
+                          wrongOneTimeLeft <= 10 ? 'bg-red-50 text-red-500' : 'bg-gray-100 text-gray-700'
+                        }`}>
+                          0:{wrongOneTimeLeft.toString().padStart(2, '0')}
+                        </div>
+                      </div>
                     )}
+                  </div>
+
+                  {/* Body */}
+                  {isLoadingPractice ? (
+                    <div className="flex-1 flex items-center justify-center">
+                      <div className="text-center">
+                        <div className="w-10 h-10 border-2 border-gray-200 border-t-black rounded-full animate-spin mx-auto mb-3" />
+                        <p className="text-gray-400 text-sm">Generating trick questions...</p>
+                      </div>
                     </div>
-                 </div>
+                  ) : wrongOneData.length > 0 ? (
+                    wrongOneStatus === 'playing' ? (
+                      <div className="flex-1 flex flex-col min-h-0">
+                        {/* Progress bar */}
+                        <div className="h-1 bg-gray-100 flex-shrink-0">
+                          <div className="h-full bg-black transition-all duration-300" style={{ width: `${((currentWrongOneQ) / wrongOneData.length) * 100}%` }} />
+                        </div>
+                        {/* Scrollable content */}
+                        <div className="flex-1 overflow-y-auto p-6" style={{ scrollbarWidth: 'none' }}>
+                          <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">Find the incorrect statement</p>
+                          <p className="text-base md:text-lg font-semibold text-gray-900 mb-5 leading-relaxed">
+                            Which of the following is WRONG?
+                          </p>
+                          <div className="flex flex-col gap-2.5">
+                            {wrongOneData[currentWrongOneQ].options.map((opt: string, optIdx: number) => (
+                              <button
+                                key={optIdx}
+                                onClick={() => {
+                                  setWrongOneSelected(optIdx);
+                                  if (optIdx === wrongOneData[currentWrongOneQ].wrongAnswerIndex) setWrongOneScore(s => s + 1);
+                                }}
+                                disabled={wrongOneSelected !== null}
+                                className={`w-full text-left rounded-2xl px-4 py-3.5 border font-medium text-sm transition-all flex items-start gap-3 ${
+                                  wrongOneSelected === null
+                                    ? 'bg-gray-50 border-gray-200 hover:border-gray-900 hover:bg-white text-gray-800'
+                                    : optIdx === wrongOneData[currentWrongOneQ].wrongAnswerIndex
+                                      ? 'bg-green-50 border-green-400 text-green-900'
+                                      : wrongOneSelected === optIdx
+                                        ? 'bg-red-50 border-red-400 text-red-900'
+                                        : 'bg-gray-50 border-gray-100 text-gray-300'
+                                }`}
+                              >
+                                <span className={`w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold border mt-0.5 ${
+                                  wrongOneSelected !== null && optIdx === wrongOneData[currentWrongOneQ].wrongAnswerIndex
+                                    ? 'bg-green-500 border-green-500 text-white'
+                                    : wrongOneSelected === optIdx && optIdx !== wrongOneData[currentWrongOneQ].wrongAnswerIndex
+                                      ? 'bg-red-500 border-red-500 text-white'
+                                      : 'border-gray-300 text-gray-500 bg-white'
+                                }`}>{String.fromCharCode(65 + optIdx)}</span>
+                                <span className="leading-relaxed">{opt}</span>
+                              </button>
+                            ))}
+                          </div>
+                          {/* Explanation */}
+                          {wrongOneSelected !== null && (
+                            <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-2xl">
+                              <p className="text-xs font-bold text-amber-700 uppercase tracking-wide mb-1">Explanation</p>
+                              <p className="text-sm text-amber-900 leading-relaxed">{wrongOneData[currentWrongOneQ].explanation}</p>
+                            </div>
+                          )}
+                        </div>
+                        {/* Footer */}
+                        {wrongOneSelected !== null && (
+                          <div className="px-6 py-4 border-t border-gray-100 flex justify-end flex-shrink-0">
+                            <button
+                              onClick={() => {
+                                if (currentWrongOneQ < wrongOneData.length - 1) {
+                                  setCurrentWrongOneQ(q => q + 1);
+                                  setWrongOneSelected(null);
+                                  setWrongOneTimeLeft(30);
+                                } else {
+                                  setWrongOneStatus('completed');
+                                }
+                              }}
+                              className="px-6 py-2.5 bg-black text-white rounded-full text-sm font-semibold hover:bg-gray-800 transition-colors"
+                            >
+                              {currentWrongOneQ < wrongOneData.length - 1 ? 'Next →' : 'See Results'}
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
+                        <div className="w-28 h-28 rounded-full bg-gray-50 border-4 border-gray-100 flex items-center justify-center mb-5">
+                          <span className="text-3xl font-bold text-gray-900">{Math.round((wrongOneScore / wrongOneData.length) * 100)}%</span>
+                        </div>
+                        <h4 className="text-2xl font-bold text-gray-900 mb-1">Round Complete!</h4>
+                        <p className="text-gray-400 mb-1">{wrongOneScore} correct out of {wrongOneData.length}</p>
+                        <p className="text-gray-400 text-sm mb-8">
+                          {wrongOneScore === wrongOneData.length ? '🎉 Perfect!' : wrongOneScore >= wrongOneData.length * 0.7 ? '👏 Well done!' : '📚 Keep practising!'}
+                        </p>
+                        <button onClick={resetWrongOne} className="px-8 py-3 bg-black text-white rounded-full font-semibold text-sm hover:bg-gray-800 transition-colors">
+                          Try Again
+                        </button>
+                      </div>
+                    )
+                  ) : (
+                    <div className="flex-1 flex items-center justify-center text-gray-400 text-sm">No trick questions available.</div>
+                  )}
+                </div>
               </div>
             )}
           </div>
         ) : (
            <div className="p-4 grid grid-cols-2 gap-3 flex-1 content-start overflow-y-auto">
-             <button onClick={() => setExpandedPanel('prove-it')} className="rounded-2xl p-4 flex flex-col justify-center items-center gap-3 transition-all text-center aspect-square border border-gray-200 hover:border-gray-400 hover:shadow-md" style={{ background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(8px)' }}>
+             <button onClick={() => setExpandedPanel('prove-it')} className="rounded-2xl p-4 flex flex-col justify-center items-center gap-3 transition-all text-center aspect-square border border-gray-200 hover:border-gray-400 hover:shadow-md" style={{ background: 'rgba(255,255,255,0.5)', backdropFilter: 'blur(12px)' }}>
                 <div className="text-gray-800 rounded-full p-3 border border-gray-200 bg-white/80">
                    <FileBadge className="w-5 h-5" />
                 </div>

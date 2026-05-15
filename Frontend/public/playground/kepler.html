@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Kepler's Laws — Mootion</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
   --bg:#060a13;--surface:rgba(255,255,255,0.032);--border:rgba(255,255,255,0.07);
   --text:#f0f0f0;--muted:rgba(255,255,255,0.38);--dim:rgba(255,255,255,0.18);
   --law1:#7ab8f5;--law2:#5DCAA5;--law3:#c49af7;
   --orange:#EF9F27;--red:#f06060;--sun:#FFC832;
-  --ff:'Syne',sans-serif;--fm:'DM Mono',monospace;
+  --ff:'Inter',sans-serif;--fm:'Inter',monospace;
 }
 html,body{width:100%;height:100%;background:var(--bg);overflow:hidden;font-family:var(--ff)}
 
@@ -21,21 +21,21 @@ html,body{width:100%;height:100%;background:var(--bg);overflow:hidden;font-famil
 
 /* TOP BAR */
 #topbar{grid-area:top;display:flex;align-items:center;justify-content:space-between;padding:0 20px;border-bottom:.5px solid var(--border);z-index:10}
-#wordmark{font-size:12px;font-weight:600;letter-spacing:.14em;color:var(--muted);text-transform:uppercase;font-family:var(--fm)}
+#wordmark{font-size:11px;font-weight:700;letter-spacing:.18em;color:var(--muted);text-transform:uppercase}
 #law-tabs{display:flex;gap:3px;background:rgba(255,255,255,0.04);border:.5px solid var(--border);border-radius:9px;padding:3px}
-.law-tab{font-size:11px;font-weight:500;font-family:var(--fm);letter-spacing:.04em;padding:4px 14px;border-radius:6px;border:none;background:transparent;color:var(--muted);cursor:pointer;transition:all .18s;white-space:nowrap}
+.law-tab{font-size:10px;font-weight:600;letter-spacing:.06em;padding:4px 14px;border-radius:6px;border:none;background:transparent;color:var(--muted);cursor:pointer;transition:all .18s;white-space:nowrap;text-transform:uppercase}
 .law-tab:hover{color:var(--text)}
-.law-tab[data-law="1"].active{background:var(--law1);color:#060a13;font-weight:600}
-.law-tab[data-law="2"].active{background:var(--law2);color:#060a13;font-weight:600}
-.law-tab[data-law="3"].active{background:var(--law3);color:#060a13;font-weight:600}
-#pause-btn{font-size:11px;color:var(--muted);background:none;border:.5px solid var(--border);border-radius:6px;padding:4px 12px;cursor:pointer;font-family:var(--fm);letter-spacing:.05em;transition:all .18s}
+.law-tab[data-law="1"].active{background:var(--law1);color:#060a13;font-weight:700}
+.law-tab[data-law="2"].active{background:var(--law2);color:#060a13;font-weight:700}
+.law-tab[data-law="3"].active{background:var(--law3);color:#060a13;font-weight:700}
+#pause-btn{font-size:10px;color:var(--muted);background:none;border:.5px solid var(--border);border-radius:6px;padding:4px 12px;cursor:pointer;font-weight:600;letter-spacing:.08em;text-transform:uppercase;transition:all .18s}
 #pause-btn:hover{color:var(--text);border-color:rgba(255,255,255,0.25)}
 
 /* CALLOUT */
 #callout{grid-area:call;display:flex;align-items:center;gap:10px;padding:0 20px;border-bottom:.5px solid var(--border);background:rgba(255,255,255,0.013)}
-#callout-num{font-size:10px;font-family:var(--fm);font-weight:500;letter-spacing:.1em;padding:2px 8px;border-radius:4px;flex-shrink:0}
-#callout-text{font-size:12px;font-weight:500;color:var(--text);font-family:var(--fm)}
-#callout-hint{margin-left:auto;font-size:11px;font-family:var(--fm);color:var(--dim);flex-shrink:0}
+#callout-num{font-size:9px;font-weight:700;letter-spacing:.14em;padding:2px 8px;border-radius:4px;flex-shrink:0;text-transform:uppercase}
+#callout-text{font-size:11px;font-weight:500;color:var(--text)}
+#callout-hint{margin-left:auto;font-size:10px;color:var(--dim);flex-shrink:0;font-weight:500;letter-spacing:.03em}
 
 /* SIM CANVAS AREA */
 #sim{grid-area:sim;position:relative;overflow:hidden}
@@ -44,14 +44,14 @@ html,body{width:100%;height:100%;background:var(--bg);overflow:hidden;font-famil
 
 /* HUD */
 #hud{position:absolute;top:12px;left:14px;display:flex;gap:5px;flex-wrap:wrap;pointer-events:none}
-.badge{background:rgba(6,10,19,.75);border:.5px solid var(--border);border-radius:6px;padding:3px 9px;font-size:11px;color:var(--muted);font-family:var(--fm);backdrop-filter:blur(8px)}
-.badge b{color:var(--text);font-weight:500}
+.badge{background:rgba(6,10,19,.75);border:.5px solid var(--border);border-radius:6px;padding:3px 9px;font-size:10px;color:var(--muted);font-weight:500;letter-spacing:.04em;text-transform:uppercase;backdrop-filter:blur(8px)}
+.badge b{color:var(--text);font-weight:600;text-transform:none;letter-spacing:0}
 
 /* overlay readouts */
 #overlay{position:absolute;top:12px;right:12px;display:flex;flex-direction:column;gap:5px;pointer-events:none}
-.oblock{background:rgba(6,10,19,.78);border:.5px solid var(--border);border-radius:8px;padding:7px 12px;font-family:var(--fm);backdrop-filter:blur(8px)}
-.otitle{font-size:10px;color:var(--dim);letter-spacing:.08em;text-transform:uppercase;margin-bottom:3px}
-.oval{font-size:12px;color:var(--text);font-weight:500}
+.oblock{background:rgba(6,10,19,.78);border:.5px solid var(--border);border-radius:8px;padding:7px 12px;backdrop-filter:blur(8px)}
+.otitle{font-size:9px;color:var(--dim);letter-spacing:.12em;text-transform:uppercase;margin-bottom:3px;font-weight:600}
+.oval{font-size:12px;color:var(--text);font-weight:600}
 .ohigh{color:var(--law3)}
 
 /* SIDE PANEL */
@@ -61,14 +61,14 @@ html,body{width:100%;height:100%;background:var(--bg);overflow:hidden;font-famil
 #panel::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:2px}
 
 .p-section{padding:14px 16px;border-bottom:.5px solid var(--border)}
-.p-section-title{font-size:10px;font-family:var(--fm);color:var(--dim);letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.p-section-title{font-size:9px;font-weight:700;color:var(--dim);letter-spacing:.14em;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:6px}
 .p-section-title::after{content:'';flex:1;height:.5px;background:var(--border)}
 
 .p-row{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
 .p-row:last-child{margin-bottom:0}
 .p-label{display:flex;justify-content:space-between;align-items:center}
-.p-name{font-size:11px;font-family:var(--fm);color:var(--muted)}
-.p-val{font-size:11px;font-family:var(--fm);font-weight:500;color:var(--text)}
+.p-name{font-size:10px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.p-val{font-size:11px;font-weight:600;color:var(--text)}
 
 input[type=range]{
   width:100%;-webkit-appearance:none;appearance:none;
@@ -89,7 +89,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.3)}
 
 .p-divider{height:.5px;background:var(--border);margin:8px 0}
 
-.reset-btn{width:100%;padding:7px;font-size:11px;font-family:var(--fm);letter-spacing:.06em;background:rgba(255,255,255,0.04);border:.5px solid var(--border);border-radius:6px;color:var(--muted);cursor:pointer;transition:all .18s;margin-top:4px}
+.reset-btn{width:100%;padding:7px;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;background:rgba(255,255,255,0.04);border:.5px solid var(--border);border-radius:6px;color:var(--muted);cursor:pointer;transition:all .18s;margin-top:4px}
 .reset-btn:hover{background:rgba(255,255,255,0.07);color:var(--text)}
 
 /* law-specific panel sections */
@@ -98,11 +98,8 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.3)}
 
 /* presets */
 .preset-row{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:4px}
-.preset-btn{font-size:10px;font-family:var(--fm);padding:3px 9px;border-radius:5px;border:.5px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all .15s;letter-spacing:.03em}
+.preset-btn{font-size:9px;font-weight:700;letter-spacing:.06em;padding:3px 9px;border-radius:5px;border:.5px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all .15s;text-transform:uppercase}
 .preset-btn:hover{color:var(--text);border-color:rgba(255,255,255,0.25)}
-
-/* indicator dot on slider track */
-.track-wrap{position:relative}
 
 @media(max-width:640px){
   #root{grid-template-columns:1fr;grid-template-rows:50px 40px 1fr 220px;grid-template-areas:"top top""call call""sim sim""panel panel"}
@@ -122,7 +119,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.3)}
       <button class="law-tab" data-law="2">Law II — Equal Areas</button>
       <button class="law-tab" data-law="3">Law III — Harmonics</button>
     </div>
-    <button id="pause-btn">⏸ pause</button>
+    <button id="pause-btn">⏸ Pause</button>
   </div>
 
   <!-- CALLOUT -->
@@ -147,11 +144,11 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.3)}
       <div class="p-section-title">Universe</div>
 
       <div class="p-row">
-        <div class="p-label"><span class="p-name">gravitational G</span><span class="p-val" id="v-G">1.00×</span></div>
+        <div class="p-label"><span class="p-name">Gravitational G</span><span class="p-val" id="v-G">1.00×</span></div>
         <input type="range" id="r-G" class="r-sun" min="0.2" max="3.0" step="0.05" value="1.0">
       </div>
       <div class="p-row">
-        <div class="p-label"><span class="p-name">solar mass</span><span class="p-val" id="v-Msun">1.00×</span></div>
+        <div class="p-label"><span class="p-name">Solar Mass</span><span class="p-val" id="v-Msun">1.00×</span></div>
         <input type="range" id="r-Msun" class="r-sun" min="0.2" max="4.0" step="0.05" value="1.0">
       </div>
 
@@ -159,7 +156,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.3)}
       <div class="p-section-title" style="margin-bottom:6px">Presets</div>
       <div class="preset-row">
         <button class="preset-btn" data-preset="earth">Earth</button>
-        <button class="preset-btn" data-preset="jupiter">Jupiter-like</button>
+        <button class="preset-btn" data-preset="jupiter">Jupiter</button>
         <button class="preset-btn" data-preset="chaos">Chaos</button>
         <button class="preset-btn" data-preset="weak">Weak G</button>
       </div>
@@ -169,58 +166,58 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.3)}
     <div class="p-section law-section" id="l1-panel">
       <div class="p-section-title">Law I Controls</div>
       <div class="p-row">
-        <div class="p-label"><span class="p-name">orbital speed</span><span class="p-val" id="v-vel1">1.00×</span></div>
+        <div class="p-label"><span class="p-name">Orbital Speed</span><span class="p-val" id="v-vel1">1.00×</span></div>
         <input type="range" id="r-vel1" class="r-blue" min="0.3" max="1.85" step="0.01" value="1.0">
       </div>
       <div class="p-row">
-        <div class="p-label"><span class="p-name">starting distance</span><span class="p-val" id="v-dist1">1.00 AU</span></div>
+        <div class="p-label"><span class="p-name">Starting Distance</span><span class="p-val" id="v-dist1">1.00 AU</span></div>
         <input type="range" id="r-dist1" class="r-blue" min="0.35" max="2.2" step="0.01" value="1.0">
       </div>
       <div class="p-row">
-        <div class="p-label"><span class="p-name">planet mass</span><span class="p-val" id="v-mass1">1.00×</span></div>
+        <div class="p-label"><span class="p-name">Planet Mass</span><span class="p-val" id="v-mass1">1.00×</span></div>
         <input type="range" id="r-mass1" class="r-blue" min="0.1" max="8.0" step="0.1" value="1.0">
       </div>
-      <button class="reset-btn" id="reset1">reset law I</button>
+      <button class="reset-btn" id="reset1">Reset Law I</button>
     </div>
 
     <!-- LAW 2 PANEL -->
     <div class="p-section law-section" id="l2-panel">
       <div class="p-section-title">Law II Controls</div>
       <div class="p-row">
-        <div class="p-label"><span class="p-name">orbital speed</span><span class="p-val" id="v-vel2">0.72×</span></div>
+        <div class="p-label"><span class="p-name">Orbital Speed</span><span class="p-val" id="v-vel2">0.72×</span></div>
         <input type="range" id="r-vel2" class="r-green" min="0.35" max="1.6" step="0.01" value="0.72">
       </div>
       <div class="p-row">
-        <div class="p-label"><span class="p-name">starting distance</span><span class="p-val" id="v-dist2">1.00 AU</span></div>
+        <div class="p-label"><span class="p-name">Starting Distance</span><span class="p-val" id="v-dist2">1.00 AU</span></div>
         <input type="range" id="r-dist2" class="r-green" min="0.4" max="2.0" step="0.01" value="1.0">
       </div>
       <div class="p-row">
-        <div class="p-label"><span class="p-name">sweep duration</span><span class="p-val" id="v-sweep">12%</span></div>
+        <div class="p-label"><span class="p-name">Sweep Duration</span><span class="p-val" id="v-sweep">12%</span></div>
         <input type="range" id="r-sweep" class="r-green" min="5" max="25" step="1" value="12">
       </div>
-      <button class="reset-btn" id="reset2">reset law II</button>
+      <button class="reset-btn" id="reset2">Reset Law II</button>
     </div>
 
     <!-- LAW 3 PANEL -->
     <div class="p-section law-section" id="l3-panel">
       <div class="p-section-title">Law III Controls</div>
       <div class="p-row">
-        <div class="p-label"><span class="p-name">inner planet speed</span><span class="p-val" id="v-vel3i">1.00×</span></div>
+        <div class="p-label"><span class="p-name">Inner Planet Speed</span><span class="p-val" id="v-vel3i">1.00×</span></div>
         <input type="range" id="r-vel3i" class="r-blue" min="0.6" max="1.4" step="0.01" value="1.0">
       </div>
       <div class="p-row">
-        <div class="p-label"><span class="p-name">outer orbit distance</span><span class="p-val" id="v-dist3">2.00 AU</span></div>
+        <div class="p-label"><span class="p-name">Outer Orbit Distance</span><span class="p-val" id="v-dist3">2.00 AU</span></div>
         <input type="range" id="r-dist3" class="r-purple" min="1.3" max="3.5" step="0.05" value="2.0">
       </div>
       <div class="p-row">
-        <div class="p-label"><span class="p-name">outer planet speed</span><span class="p-val" id="v-vel3o">1.00×</span></div>
+        <div class="p-label"><span class="p-name">Outer Planet Speed</span><span class="p-val" id="v-vel3o">1.00×</span></div>
         <input type="range" id="r-vel3o" class="r-purple" min="0.5" max="1.5" step="0.01" value="1.0">
       </div>
       <div class="p-row">
-        <div class="p-label"><span class="p-name">outer planet mass</span><span class="p-val" id="v-mass3">1.0×</span></div>
+        <div class="p-label"><span class="p-name">Outer Planet Mass</span><span class="p-val" id="v-mass3">1.0×</span></div>
         <input type="range" id="r-mass3" class="r-purple" min="0.1" max="10.0" step="0.1" value="1.0">
       </div>
-      <button class="reset-btn" id="reset3">reset law III</button>
+      <button class="reset-btn" id="reset3">Reset Law III</button>
     </div>
 
   </div><!-- /panel -->
@@ -241,7 +238,9 @@ const P={
   // L3
   vel3i:1.0, dist3:2.0, vel3o:1.0, mass3:1.0,
 };
-const DT=0.013, TRAIL=520;
+
+// Larger DT and more substeps = visibly fast motion from frame 1
+const DT=0.032, TRAIL=520, SUBSTEPS=6;
 let currentLaw=1, paused=false;
 let stars=null;
 
@@ -335,7 +334,6 @@ function l1Foci(){
   const p2=Lz*Lz/GM;
   const ecc2=1-p2/a;
   L1.ecc=ecc2<0?0:Math.sqrt(Math.min(ecc2,1));
-  // eccentricity vector
   const ex=(L1.vx*Lz/GM)-(dx/r);
   const ey=(L1.vy*Lz/GM)-(dy/r);
   const em=Math.sqrt(ex*ex+ey*ey)||1;
@@ -365,10 +363,10 @@ function l1Draw(){
     drawFocus(L1.f2x,L1.f2y);
     ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(L1.f2x,L1.f2y);
     ctx.strokeStyle='rgba(240,96,96,0.15)';ctx.lineWidth=1;ctx.setLineDash([4,8]);ctx.stroke();ctx.setLineDash([]);
-    mono(L1.f2x+10,L1.f2y-8,'F₂','rgba(240,96,96,0.6)');
+    label(L1.f2x+10,L1.f2y-8,'F₂','rgba(240,96,96,0.6)');
   }
   drawSun(cx,cy,P.Msun);
-  mono(cx+14,cy-16,'F₁ (Sun)','rgba(255,200,60,0.55)');
+  label(cx+14,cy-16,'F₁ (Sun)','rgba(255,200,60,0.55)');
   drawPlanet(L1.px,L1.py,col,5+P.mass1*0.6);
 
   const v=Math.sqrt(L1.vx*L1.vx+L1.vy*L1.vy);
@@ -380,10 +378,6 @@ function l1Draw(){
     ['speed',`${kmS} km/s`],
     ['r',`${(d/(auScale1()/P.dist1)).toFixed(2)} AU`],
   ]);
-  if(L1.orbitType==='circular'&&L1.trail.length>80){
-    ctx.font=`400 11px 'DM Mono',monospace`;ctx.fillStyle='rgba(255,255,255,0.22)';
-    ctx.textAlign='center';ctx.fillText('drag the planet to warp the orbit',cx,H-18);ctx.textAlign='left';
-  }
 }
 
 // drag
@@ -451,7 +445,6 @@ function wedge(pts,col,alpha){
   if(pts.length<2)return;
   ctx.beginPath();ctx.moveTo(cx,cy);pts.forEach(p=>ctx.lineTo(p.x,p.y));ctx.closePath();
   ctx.fillStyle=col+alpha;ctx.fill();
-  // boundary lines
   ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(pts[0].x,pts[0].y);
   ctx.moveTo(cx,cy);ctx.lineTo(pts[pts.length-1].x,pts[pts.length-1].y);
   ctx.strokeStyle=col+'99';ctx.lineWidth=1;ctx.stroke();
@@ -464,10 +457,9 @@ function l2Draw(){
   wedge(L2.farWedge,'rgba(93,202,165,','0.18)');
   drawSun(cx,cy,P.Msun);
   drawPlanet(L2.px,L2.py,'#7ab8f5');
-  // overlay
   let ov='';
   if(!L2.periodDone){
-    ov=`<div class="oblock"><div class="otitle">status</div><div class="oval">measuring orbit…</div></div>`;
+    ov=`<div class="oblock"><div class="otitle">Status</div><div class="oval">Measuring orbit…</div></div>`;
     hud([['calibrating','first revolution']]);
   } else {
     const ratio=L2.pFar>0?L2.pNear/L2.pFar:0;
@@ -475,15 +467,15 @@ function l2Draw(){
     const rc=eq?'#5DCAA5':'#EF9F27';
     ov=`
       <div class="oblock">
-        <div class="otitle">near-sun sweep</div>
+        <div class="otitle">Near-Sun Sweep</div>
         <div class="oval">${L2.pNear>0?L2.pNear.toFixed(0)+' px²':'—'}</div>
       </div>
       <div class="oblock">
-        <div class="otitle">far sweep</div>
+        <div class="otitle">Far Sweep</div>
         <div class="oval">${L2.pFar>0?L2.pFar.toFixed(0)+' px²':'—'}</div>
       </div>
       <div class="oblock" style="border-color:${rc}33">
-        <div class="otitle">ratio</div>
+        <div class="otitle">Ratio</div>
         <div class="oval" style="color:${rc}">${ratio>0?ratio.toFixed(3)+' '+(eq?'≈ 1 ✓':'≠ 1 ✗'):'—'}</div>
       </div>`;
     const sp=Math.sqrt(L2.vx*L2.vx+L2.vy*L2.vy);
@@ -553,15 +545,15 @@ function l3Draw(){
     const c=ok?'#5DCAA5':'#EF9F27';
     ov=`
       <div class="oblock">
-        <div class="otitle">inner period T₁</div>
+        <div class="otitle">Inner Period T₁</div>
         <div class="oval">${L3.T1.toFixed(2)} s</div>
       </div>
       <div class="oblock">
-        <div class="otitle">outer period T₂</div>
+        <div class="otitle">Outer Period T₂</div>
         <div class="oval">${L3.T2.toFixed(2)} s</div>
       </div>
       <div class="oblock">
-        <div class="otitle">T₂/T₁ ratio</div>
+        <div class="otitle">T₂/T₁ Ratio</div>
         <div class="oval">${tR.toFixed(3)}</div>
       </div>
       <div class="oblock" style="border-color:${c}44">
@@ -569,20 +561,20 @@ function l3Draw(){
         <div class="oval" style="color:${c}">${check.toFixed(3)} ${ok?'≈ 1 ✓':'≠ 1 ✗'}</div>
       </div>`;
   } else {
-    ov=`<div class="oblock"><div class="otitle">status</div><div class="oval">measuring orbits…</div></div>
-        <div class="oblock"><div class="otitle">outer a</div><div class="oval">${a2.toFixed(2)} AU</div></div>`;
+    ov=`<div class="oblock"><div class="otitle">Status</div><div class="oval">Measuring orbits…</div></div>
+        <div class="oblock"><div class="otitle">Outer a</div><div class="oval">${a2.toFixed(2)} AU</div></div>`;
   }
   document.getElementById('overlay').innerHTML=ov;
 }
 
 // ════════════════════════════════════════
-//  LOOP
+//  LOOP — SUBSTEPS for visible speed
 // ════════════════════════════════════════
 function loop(){
   if(!paused){
-    if(currentLaw===1){for(let i=0;i<3;i++)l1Step();l1Draw();}
-    else if(currentLaw===2){for(let i=0;i<3;i++)l2Step();l2Draw();}
-    else if(currentLaw===3){for(let i=0;i<3;i++)l3Step();l3Draw();}
+    if(currentLaw===1){for(let i=0;i<SUBSTEPS;i++)l1Step();l1Draw();}
+    else if(currentLaw===2){for(let i=0;i<SUBSTEPS;i++)l2Step();l2Draw();}
+    else if(currentLaw===3){for(let i=0;i<SUBSTEPS;i++)l3Step();l3Draw();}
   }
   requestAnimationFrame(loop);
 }
@@ -590,7 +582,10 @@ function loop(){
 // ════════════════════════════════════════
 //  UI HELPERS
 // ════════════════════════════════════════
-function mono(x,y,t,c){ctx.font=`400 11px 'DM Mono',monospace`;ctx.fillStyle=c;ctx.fillText(t,x,y);}
+function label(x,y,t,c){
+  ctx.font=`500 11px 'Inter',sans-serif`;
+  ctx.fillStyle=c;ctx.fillText(t,x,y);
+}
 function hud(pairs){
   document.getElementById('hud').innerHTML=pairs.map(([k,v])=>`<div class="badge">${k} <b>${v}</b></div>`).join('');
 }
@@ -614,9 +609,9 @@ function setupSlider(id,col,mn,mx,cb){
 //  CALLOUT
 // ════════════════════════════════════════
 const CALLS={
-  1:{num:'LAW I',  text:'Planets orbit in ellipses — Sun at one focus.',   hint:'drag planet to stretch orbit',color:'#7ab8f5'},
-  2:{num:'LAW II', text:'Equal areas swept in equal times.',                hint:'orange = fast near arc, teal = slow far arc',color:'#5DCAA5'},
-  3:{num:'LAW III',text:'T² ∝ a³ — period squared scales with axis cubed.',hint:'slide outer distance, watch T²/a³',color:'#c49af7'},
+  1:{num:'Law I',  text:'Planets orbit in ellipses — Sun at one focus.',   hint:'Drag planet to stretch orbit',color:'#7ab8f5'},
+  2:{num:'Law II', text:'Equal areas swept in equal times.',                hint:'Orange = fast near arc · teal = slow far arc',color:'#5DCAA5'},
+  3:{num:'Law III',text:'T² ∝ a³ — period squared scales with axis cubed.',hint:'Slide outer distance, watch T²/a³',color:'#c49af7'},
 };
 function setCallout(law){
   const c=CALLS[law];
@@ -624,6 +619,17 @@ function setCallout(law){
   num.textContent=c.num;num.style.background=c.color+'22';num.style.color=c.color;num.style.border=`.5px solid ${c.color}44`;
   document.getElementById('callout-text').textContent=c.text;
   document.getElementById('callout-hint').textContent=c.hint;
+}
+
+// ════════════════════════════════════════
+//  WARMUP — pre-run physics so planet is
+//  already mid-orbit on first render
+// ════════════════════════════════════════
+function warmup(){
+  const WARM=400;
+  if(currentLaw===1){ for(let i=0;i<WARM;i++) l1Step(); }
+  else if(currentLaw===2){ for(let i=0;i<WARM;i++) l2Step(); }
+  else { for(let i=0;i<WARM;i++) l3Step(); }
 }
 
 // ════════════════════════════════════════
@@ -654,6 +660,7 @@ function switchLaw(law){
     l1Init();
   } else if(law===2) l2Init();
   else l3Init();
+  warmup();
 }
 
 function l1TDown(e){e.preventDefault();l1Down(e.touches[0]);}
@@ -663,25 +670,21 @@ function l1TMove(e){e.preventDefault();l1Move(e.touches[0]);}
 //  SLIDERS WIRING
 // ════════════════════════════════════════
 function wireAll(){
-  // Universal
   setupSlider('r-G','#FFC832',0.2,3.0,v=>{P.G=v*1800;document.getElementById('v-G').textContent=v.toFixed(2)+'×';reinit();});
   setupSlider('r-Msun','#FFC832',0.2,4.0,v=>{P.Msun=v;document.getElementById('v-Msun').textContent=v.toFixed(2)+'×';reinit();});
-  // L1
   setupSlider('r-vel1','#7ab8f5',0.3,1.85,v=>{P.vel1=v;document.getElementById('v-vel1').textContent=v.toFixed(2)+'×';l1Init();});
   setupSlider('r-dist1','#7ab8f5',0.35,2.2,v=>{P.dist1=v;document.getElementById('v-dist1').textContent=v.toFixed(2)+' AU';l1Init();});
   setupSlider('r-mass1','#7ab8f5',0.1,8.0,v=>{P.mass1=v;document.getElementById('v-mass1').textContent=v.toFixed(2)+'×';l1Init();});
-  // L2
   setupSlider('r-vel2','#5DCAA5',0.35,1.6,v=>{P.vel2=v;document.getElementById('v-vel2').textContent=v.toFixed(2)+'×';l2Init();});
   setupSlider('r-dist2','#5DCAA5',0.4,2.0,v=>{P.dist2=v;document.getElementById('v-dist2').textContent=v.toFixed(2)+' AU';l2Init();});
   setupSlider('r-sweep','#5DCAA5',5,25,v=>{P.sweepPct=v/100;document.getElementById('v-sweep').textContent=v.toFixed(0)+'%';});
-  // L3
   setupSlider('r-vel3i','#7ab8f5',0.6,1.4,v=>{P.vel3i=v;document.getElementById('v-vel3i').textContent=v.toFixed(2)+'×';l3Init();});
   setupSlider('r-dist3','#c49af7',1.3,3.5,v=>{P.dist3=v;document.getElementById('v-dist3').textContent=v.toFixed(2)+' AU';l3Init();});
   setupSlider('r-vel3o','#c49af7',0.5,1.5,v=>{P.vel3o=v;document.getElementById('v-vel3o').textContent=v.toFixed(2)+'×';l3Init();});
   setupSlider('r-mass3','#c49af7',0.1,10.0,v=>{P.mass3=v;document.getElementById('v-mass3').textContent=v.toFixed(1)+'×';l3Init();});
 }
 
-function reinit(){if(currentLaw===1)l1Init();else if(currentLaw===2)l2Init();else l3Init();}
+function reinit(){if(currentLaw===1)l1Init();else if(currentLaw===2)l2Init();else l3Init();warmup();}
 
 // ════════════════════════════════════════
 //  PRESETS
@@ -696,7 +699,6 @@ function applyPreset(name){
   const pr=PRESETS[name];
   Object.assign(P,pr);
   P.G=P.G*1800;
-  // sync slider values + fills
   const map=[
     ['r-G',P.G/1800,0.2,3.0,'#FFC832','v-G',v=>v.toFixed(2)+'×'],
     ['r-Msun',P.Msun,0.2,4.0,'#FFC832','v-Msun',v=>v.toFixed(2)+'×'],
@@ -728,7 +730,7 @@ document.querySelectorAll('.preset-btn').forEach(b=>b.addEventListener('click',(
 document.querySelectorAll('.law-tab').forEach(t=>t.addEventListener('click',()=>switchLaw(+t.dataset.law)));
 document.getElementById('pause-btn').addEventListener('click',()=>{
   paused=!paused;
-  document.getElementById('pause-btn').textContent=paused?'▶ resume':'⏸ pause';
+  document.getElementById('pause-btn').textContent=paused?'▶ Resume':'⏸ Pause';
 });
 
 // ════════════════════════════════════════
