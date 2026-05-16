@@ -1,10 +1,6 @@
 <p align="center">
   <br/>
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="">
-    <source media="(prefers-color-scheme: light)" srcset="">
-    <img alt="MOOTION" src="Frontend\public\read\home.png" width="600">
-  </picture>
+  <img alt="MOOTION" src="Frontend/public/read/home.png" width="600">
   <br/>
 </p>
 
