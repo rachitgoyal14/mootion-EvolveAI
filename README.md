@@ -204,20 +204,20 @@ MOOTION follows a **two-backend microservices** architecture with a unified Expr
 │                                                                    │
 │  React 19 + Vite 6 + Tailwind v4 + Motion + ReactFlow + Three.js   │
 │                                                                    │
-│  ┌──────────────┐  ┌──────────────┐  ┌────────────────────────┐    │
-│  │  Home/Onboard │  │  Roadmap     │  │  Concept Workspace    │    │
-│  │  (pixel-art)  │  │  (ReactFlow) │  │ ┌──────┬────┬───────┐ │    │
-│  └──────────────┘  └──────────────┘  │ │ Chat │Viz │Practice│ │    │
-│                                        │ └──────┴────┴───────┘│    │
-│                                        └──────────────────────┘    │
+│  ┌─────────────-─┐  ┌─────────────-─┐    ┌─────────────────────┐   │
+│  │  Home/Onboard │  │  Roadmap      │    │  Concept Workspace  │   │
+│  │  (pixel-art)  │  │  (ReactFlow)  │    │ ┌──────┬────┬────── │   │
+│  └─────────────-─┘  └──────────────-┘    │ Chat │Viz │Practice │   │
+│                                          └──────┴────┴───────┘ │   │
+│                                          └────────────────────-┘   │
 │                                                                    │
 │  ┌─────────────────────────────────────────────────────────────┐   │
 │  │                  Express 4 Server (server.ts)               │   │
-│  │  ┌────────────────┐ ┌──────────────┐ ┌────────────────-┐    │   │
-│  │  │  Gemini AI API  │ │  Vite Dev    │ │  WebSocket     │    │   │
-│  │  │  (Chat, TTS,    │ │  Middleware   │ │  (/live)      │    │   │
-│  │  │  Roadmaps, Quiz)│ │              │ │  Gemini Live   │    │   │
-│  │  └────────────────┘ └──────────────┘ └────────────────-┘    │   │
+│  │  ┌───────────────-─┐ ┌──────────────┐ ┌────────────────-┐   │   │
+│  │  │  Gemini AI API  │ │  Vite Dev    │ │  WebSocket      │   │   │
+│  │  │  (Chat, TTS,    │ │  Middleware  │ │  (/live)        │   │   │
+│  │  │  Roadmaps, Quiz)│ │              │ │  Gemini Live    │   │   │
+│  │  └───────────────=─┘ └──────────────┘ └────────────────-┘   │   │
 │  └─────────────────────────────────────────────────────────────┘   │
 └──────────────────────────┬─────────────────────────────────────────┘
                            │
@@ -472,27 +472,6 @@ Run the full 5-stage Manim video generation pipeline.
 
 #### `GET /video/{video_id}`
 Serve generated video. Returns `404` if pipeline incomplete.
-
-<br/>
-
-<br/>
-
----
-
-<br/>
-
-## 👥 Team - Evolve AI
-
-Built for the **WitchHunt Hackathon 2026**, targeting 250 million STEM learners in India.
-
-| Name | Role |
-|---|---|
-
-
-| **Goyam Jain** | Lead ML Engineer — AI development and model optimisation |
-| **Poorvika Grover** | Design & UX Lead — end-to-end visual identity and user journey |
-| **Rachit Goyal** | Systems Architect & Backend — core framework design and backend orchestration |
-| **Sartaj Kaur** | Product Lead & Strategy — product vision, roadmap, and user-centric execution |
 
 <br/>
 
