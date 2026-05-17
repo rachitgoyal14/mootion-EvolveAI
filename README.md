@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  Built for <b>AI4India</b> by <b>Evolve AI</b>
+  Built for <b>WitchHunt</b> by <b>Evolve AI</b>
 </p>
 
 <p align="center">
@@ -34,7 +34,6 @@
   <img src="https://img.shields.io/badge/Motion-12-000000?logo=framer&logoColor=white" alt="Motion">
   <img src="https://img.shields.io/badge/Three.js-latest-000000?logo=threedotjs&logoColor=white" alt="Three.js">
   <img src="https://img.shields.io/badge/Manim-latest-FF6F00?logo=python&logoColor=white" alt="Manim">
-  <img src="https://img.shields.io/badge/Apache_2.0-license-blue" alt="License">
 </p>
 
 <br/>
@@ -677,7 +676,7 @@ mootion-EvolveAI/
 
 # 👥 Team — Evolve AI
 
-Built for **AI4India hackathon** by four students targeting 250 million STEM learners in India.
+Built for **WitchHunt hackathon** by four students targeting 250 million STEM learners in India.
 
 | Name | Role |
 |---|---|
@@ -807,13 +806,9 @@ Follows [Conventional Commits](https://www.conventionalcommits.org/):
 
 <br/>
 
-# 📄 License
-
-Distributed under the **Apache 2.0 License**. See `LICENSE` for more information.
-
 ---
 
-# 🙏 Acknowledgments
+# Acknowledgments
 
 - **[Google Gemini](https://deepmind.google/technologies/gemini/)** — AI models for chat, TTS, quizzes, roadmaps, and Live API
 - **[Manim](https://www.manim.community/)** — 3Blue1Brown's math animation engine
@@ -833,7 +828,7 @@ Distributed under the **Apache 2.0 License**. See `LICENSE` for more information
 
 # 👥 Team — Evolve AI
 
-Built for the **AI4India Hackathon 2026**, targeting 250 million STEM learners in India.
+Built for the **WitchHunt Hackathon 2026**, targeting 250 million STEM learners in India.
 
 | | Name | Role |
 |---|---|---|
@@ -847,5 +842,5 @@ Built for the **AI4India Hackathon 2026**, targeting 250 million STEM learners i
 ---
 
 <p align="center">
-  <sub>© 2026 MOOTION Studio — AI4India Hackathon 2026</sub>
+  <sub>© 2026 MOOTION Studio — WitchHunt Hackathon 2026</sub>
 </p>
